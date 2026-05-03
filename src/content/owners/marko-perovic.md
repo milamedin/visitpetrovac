@@ -3,7 +3,7 @@ name: Marko Perović
 email: marko@example.com
 phone: +382 68 062 259
 whatsapp: '+38268062259'
-photo: /uploads/owners/borisjeremic.jpg
+photo: ''
 bio: Lokalni domaćin sa 15 godina iskustva u izdavanju apartmana u Petrovcu.
 languages:
   - sr
