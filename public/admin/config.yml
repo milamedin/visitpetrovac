@@ -4,7 +4,7 @@
 
 backend:
   name: github
-  repo: REPLACE_WITH/visitpetrovac.com  # e.g. milamedin/visitpetrovac.com
+  repo: milamedin/visitpetrovac
   branch: main
   base_url: https://decap-oauth.YOUR-DOMAIN.workers.dev  # OAuth proxy (Cloudflare Worker)
   open_authoring: false
