@@ -84,17 +84,18 @@ const alternates = locales.map((l) => ({
     <style is:global>
       .skip-link {
         position: absolute;
-        top: -40px;
+        top: 8px;
         left: 8px;
         background: var(--c-ink);
         color: var(--c-cream);
         padding: 8px 16px;
         border-radius: var(--r-md);
         z-index: 100;
-        transition: top var(--dur) var(--ease);
+        transform: translateY(-200%);
+        transition: transform var(--dur) var(--ease);
       }
       .skip-link:focus {
-        top: 8px;
+        transform: translateY(0);
       }
     </style>
   </body>
