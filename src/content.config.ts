@@ -1,6 +1,23 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// ─── Sveltia/Decap CMS sometimes emits empty strings or null for unfilled
+// optional fields. Strip them recursively before schema validation so
+// optional/enum/reference/url fields don't blow up on empties.
+const stripEmpties = (data: unknown): unknown => {
+  if (Array.isArray(data)) return data.map(stripEmpties);
+  // Plain objects only — leave Date, RegExp, and other class instances alone
+  if (data && typeof data === 'object' && Object.getPrototypeOf(data) === Object.prototype) {
+    const cleaned: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+      if (v === '' || v === null) continue;
+      cleaned[k] = stripEmpties(v);
+    }
+    return cleaned;
+  }
+  return data;
+};
+
 // ─── i18n shape — populated by `npm run translate` ─────────────────
 const translatedString = z.string().optional();
 const localeKeys = ['en', 'ru', 'de', 'fr'] as const;
@@ -22,7 +39,7 @@ const sourceHash = z.string().optional();
 
 const categories = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/categories' }),
-  schema: z.object({
+  schema: z.preprocess(stripEmpties, z.object({
     name: z.string(),
     description: z.string().optional(),
     icon: z.string().optional(),
@@ -30,23 +47,23 @@ const categories = defineCollection({
     hero_image: z.string().optional(),
     translations: localeOf({ name: translatedString, description: translatedString }),
     source_hash: sourceHash,
-  }),
+  })),
 });
 
 const neighborhoods = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/neighborhoods' }),
-  schema: z.object({
+  schema: z.preprocess(stripEmpties, z.object({
     name: z.string(),
     description: z.string().optional(),
     order: z.number().default(0),
     translations: localeOf({ name: translatedString, description: translatedString }),
     source_hash: sourceHash,
-  }),
+  })),
 });
 
 const owners = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/owners' }),
-  schema: z.object({
+  schema: z.preprocess(stripEmpties, z.object({
     name: z.string(),
     email: z.string().email().optional(),
     phone: z.string().optional(),
@@ -56,12 +73,12 @@ const owners = defineCollection({
     languages: z.array(z.string()).default(['sr']),
     translations: localeOf({ bio: translatedString }),
     source_hash: sourceHash,
-  }),
+  })),
 });
 
 const listings = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/listings' }),
-  schema: z.object({
+  schema: z.preprocess(stripEmpties, z.object({
     title: z.string(),
     category: reference('categories'),
     owner: reference('owners').optional(),
@@ -114,12 +131,12 @@ const listings = defineCollection({
     }),
     body_translations: bodyTranslations,
     source_hash: sourceHash,
-  }),
+  })),
 });
 
 const posts = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/posts' }),
-  schema: z.object({
+  schema: z.preprocess(stripEmpties, z.object({
     title: z.string(),
     excerpt: z.string().max(300),
     cover_image: z.string().optional(),
@@ -130,12 +147,12 @@ const posts = defineCollection({
     translations: localeOf({ title: translatedString, excerpt: translatedString }),
     body_translations: bodyTranslations,
     source_hash: sourceHash,
-  }),
+  })),
 });
 
 const pages = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
-  schema: z.object({
+  schema: z.preprocess(stripEmpties, z.object({
     title: z.string(),
     show_in_menu: z.boolean().default(false),
     show_in_footer: z.boolean().default(false),
@@ -143,7 +160,7 @@ const pages = defineCollection({
     translations: localeOf({ title: translatedString }),
     body_translations: bodyTranslations,
     source_hash: sourceHash,
-  }),
+  })),
 });
 
 export const collections = { categories, neighborhoods, owners, listings, posts, pages };
