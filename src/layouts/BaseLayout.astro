@@ -72,6 +72,14 @@ const alternates = locales.map((l) => ({
     />
 
     <slot name="head" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49FR3CETGQ"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-49FR3CETGQ');
+    </script>
   </head>
   <body>
     <a href="#main" class="skip-link">{t('common.skipToContent')}</a>
