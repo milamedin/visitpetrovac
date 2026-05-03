@@ -1,14 +1,14 @@
 name = "visitpetrovac"
-main = "./dist/server/entry.mjs"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 
-[assets]
-directory = "./dist/client"
-binding = "ASSETS"
-
 [vars]
 SITE_URL = "https://visitpetrovac.com"
+
+# Astro adapter (@astrojs/cloudflare) automatski generise main i [assets]
+# u dist/server/wrangler.json tokom build-a.
+# Deploy command treba da bude:
+#   npx wrangler deploy --config dist/server/wrangler.json
 
 # ─── D1 database (vraca se kad se kreira namespace) ──────────────
 # 1. wrangler d1 create visitpetrovac-db
@@ -28,7 +28,7 @@ SITE_URL = "https://visitpetrovac.com"
 # binding = "SESSION"
 # id = "REPLACE_WITH_KV_ID"
 
-# Secrets (postavi preko Cloudflare dashboard-a):
-# - GOOGLE_SHEETS_WEBHOOK_URL
-# - IP_SALT
-# - ANTHROPIC_API_KEY (za auto-translate u build koraku)
+# Secrets (postavljaju se preko Cloudflare dashboard-a):
+# - ANTHROPIC_API_KEY (build-time, za auto-translate)
+# - GOOGLE_SHEETS_WEBHOOK_URL (runtime, za tour booking)
+# - IP_SALT (runtime, za hash-ovanje IP-a u logovima)
