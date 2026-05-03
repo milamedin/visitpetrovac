@@ -1,0 +1,254 @@
+---
+import { useI18n } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+const { t, url, pathWithoutLocale } = useI18n(Astro);
+
+const navLinks = [
+  { href: url('/smjestaj'), label: t('nav.apartments'), match: '/smjestaj' },
+  { href: url('/restorani'), label: t('nav.restaurants'), match: '/restorani' },
+  { href: url('/aktivnosti'), label: t('nav.tours'), match: '/aktivnosti' },
+  { href: url('/rent-a-car'), label: t('nav.rentacar'), match: '/rent-a-car' },
+  { href: url('/blog'), label: t('nav.guide'), match: '/blog' },
+];
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href={url('/')} class="brand" aria-label="VisitPetrovac">
+      <span class="brand__name">visit<em>petrovac</em></span>
+    </a>
+
+    <nav class="site-nav" aria-label="Glavni meni">
+      <ul class="site-nav__list">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={['site-nav__link', { 'is-active': pathWithoutLocale.startsWith(link.match) }]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="site-header__cta">
+      <LanguageSwitcher />
+      <a href={url('/postani-partner')} class="btn btn--ghost btn--sm">{t('nav.becomePartner')}</a>
+    </div>
+
+    <button class="menu-toggle" aria-label={t('nav.openMenu')} aria-expanded="false" id="menuToggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <div class="mobile-menu" id="mobileMenu" hidden>
+    <nav aria-label="Mobilni meni">
+      <ul class="mobile-menu__list">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a href={link.href} class="mobile-menu__link">{link.label}</a>
+            </li>
+          ))
+        }
+        <li class="mobile-menu__divider" />
+        <li class="mobile-menu__lang">
+          <LanguageSwitcher />
+        </li>
+        <li>
+          <a href={url('/postani-partner')} class="mobile-menu__link mobile-menu__link--cta">
+            {t('nav.becomePartner')}
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .site-header__inner {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    color: var(--c-ink);
+    flex-shrink: 0;
+  }
+
+  .brand__name {
+    font-family: var(--ff-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .brand__name em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+
+  .site-nav {
+    display: none;
+    margin-inline-start: auto;
+  }
+
+  .site-nav__list {
+    display: flex;
+    gap: var(--sp-1);
+  }
+
+  .site-nav__link {
+    display: inline-block;
+    padding: 0.625rem 1rem;
+    border-radius: var(--r-full);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--c-ink-soft);
+    transition: all var(--dur) var(--ease);
+  }
+
+  .site-nav__link:hover,
+  .site-nav__link.is-active {
+    background: rgba(7, 59, 76, 0.06);
+    color: var(--c-ink);
+  }
+
+  .site-header__cta {
+    display: none;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .btn--sm {
+    padding: 0.5rem 1.125rem;
+    font-size: var(--fs-sm);
+  }
+
+  .menu-toggle {
+    margin-inline-start: auto;
+    display: grid;
+    grid-template-rows: repeat(3, auto);
+    gap: 5px;
+    padding: 8px;
+    border-radius: var(--r-md);
+  }
+  .menu-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--c-ink);
+    border-radius: 2px;
+    transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  }
+  .menu-toggle[aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .menu-toggle[aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+  }
+  .menu-toggle[aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .mobile-menu {
+    background: var(--c-cream);
+    border-bottom: 1px solid var(--c-border);
+    padding: var(--sp-3) var(--container-px) var(--sp-6);
+    animation: slideDown var(--dur) var(--ease-out);
+  }
+  .mobile-menu[hidden] {
+    display: none;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .mobile-menu__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .mobile-menu__link {
+    display: block;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-md);
+    font-size: var(--fs-lg);
+    font-family: var(--ff-serif);
+    font-weight: 400;
+    color: var(--c-ink);
+  }
+  .mobile-menu__link:hover {
+    background: rgba(7, 59, 76, 0.06);
+  }
+  .mobile-menu__link--cta {
+    background: var(--c-ink);
+    color: var(--c-cream);
+    text-align: center;
+    font-family: var(--ff-sans);
+    font-size: var(--fs-base);
+    font-weight: 600;
+    margin-top: var(--sp-2);
+  }
+  .mobile-menu__link--cta:hover {
+    background: var(--c-accent);
+  }
+  .mobile-menu__divider {
+    height: 1px;
+    background: var(--c-border);
+    margin-block: var(--sp-2);
+  }
+  .mobile-menu__lang {
+    padding: var(--sp-2) var(--sp-4);
+  }
+
+  @media (min-width: 880px) {
+    .site-nav,
+    .site-header__cta {
+      display: flex;
+    }
+    .menu-toggle {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById('menuToggle') as HTMLButtonElement | null;
+  const menu = document.getElementById('mobileMenu') as HTMLDivElement | null;
+  if (toggle && menu) {
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+      menu.hidden = isOpen;
+    });
+
+    menu.querySelectorAll('a').forEach((a) =>
+      a.addEventListener('click', () => {
+        toggle.setAttribute('aria-expanded', 'false');
+        menu.hidden = true;
+      }),
+    );
+  }
+</script>

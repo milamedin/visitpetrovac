@@ -1,0 +1,305 @@
+---
+import { useI18n } from '../i18n';
+
+const { t, url } = useI18n(Astro);
+
+interface Props {
+  listingId: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  priceFrom?: number;
+  priceUnit?: string;
+}
+
+const { listingId, phone, whatsapp, email, website, priceFrom, priceUnit } = Astro.props;
+
+const unitLabels: Record<string, string> = {
+  per_night: t('common.unit.night'),
+  per_person: t('common.unit.person'),
+  per_day: t('common.unit.day'),
+  per_meal: t('common.unit.meal'),
+  fixed: '',
+};
+const unitLabel = priceUnit ? unitLabels[priceUnit] : '';
+---
+
+<aside class="contact-card" data-listing={listingId}>
+  {priceFrom !== undefined && (
+    <div class="contact-card__price">
+      <span class="contact-card__price-from">{t('common.from')}</span>
+      <strong>{priceFrom}€</strong>
+      {unitLabel && <span class="contact-card__price-unit">/ {unitLabel}</span>}
+    </div>
+  )}
+
+  <p class="contact-card__lead">{t('contact.priceLead')}</p>
+
+  <div class="contact-card__hidden" data-state="hidden">
+    <button class="btn btn--primary btn--lg contact-card__reveal" type="button" id="revealBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      {t('contact.reveal')}
+    </button>
+    <p class="contact-card__notice"><a href={url('/info/uslovi')}>{t('contact.acceptTerms')}</a></p>
+  </div>
+
+  <div class="contact-card__revealed" data-state="hidden" hidden>
+    {phone && (
+      <a
+        class="contact-link contact-link--phone"
+        data-track="phone"
+        href={`tel:${phone.replace(/\s+/g, '')}`}
+      >
+        <span class="contact-link__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="contact-link__body">
+          <span class="contact-link__label">{t('contact.label.phone')}</span>
+          <span class="contact-link__value">{phone}</span>
+        </span>
+      </a>
+    )}
+
+    {whatsapp && (
+      <a
+        class="contact-link contact-link--whatsapp"
+        data-track="whatsapp"
+        href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
+        target="_blank"
+        rel="noopener"
+      >
+        <span class="contact-link__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+          </svg>
+        </span>
+        <span class="contact-link__body">
+          <span class="contact-link__label">{t('contact.label.whatsapp')}</span>
+          <span class="contact-link__value">{whatsapp}</span>
+        </span>
+      </a>
+    )}
+
+    {email && (
+      <a
+        class="contact-link contact-link--email"
+        data-track="email"
+        href={`mailto:${email}`}
+      >
+        <span class="contact-link__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="contact-link__body">
+          <span class="contact-link__label">{t('contact.label.email')}</span>
+          <span class="contact-link__value">{email}</span>
+        </span>
+      </a>
+    )}
+
+    {website && (
+      <a
+        class="contact-link contact-link--website"
+        data-track="website"
+        href={website}
+        target="_blank"
+        rel="noopener"
+      >
+        <span class="contact-link__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" />
+          </svg>
+        </span>
+        <span class="contact-link__body">
+          <span class="contact-link__label">{t('contact.label.website')}</span>
+          <span class="contact-link__value">{new URL(website).hostname.replace('www.', '')}</span>
+        </span>
+      </a>
+    )}
+  </div>
+</aside>
+
+<style>
+  .contact-card {
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-xl);
+    padding: var(--sp-6);
+    box-shadow: var(--sh-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+
+  .contact-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+  }
+  .contact-card__price-from {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-muted);
+  }
+  .contact-card__price strong {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-3xl);
+    font-weight: 400;
+    color: var(--c-ink);
+    margin-inline-start: var(--sp-1);
+    line-height: 1;
+  }
+  .contact-card__price-unit {
+    font-size: var(--fs-base);
+    color: var(--c-muted);
+  }
+
+  .contact-card__lead {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    line-height: 1.55;
+  }
+  .contact-card__lead strong {
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+
+  .contact-card__reveal {
+    width: 100%;
+  }
+
+  .contact-card__notice {
+    font-size: var(--fs-xs);
+    color: var(--c-muted);
+    text-align: center;
+    margin-top: var(--sp-3);
+  }
+  .contact-card__notice a {
+    text-decoration: underline;
+  }
+
+  .contact-card__revealed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    animation: revealFade var(--dur-slow) var(--ease-out);
+  }
+  [hidden] {
+    display: none !important;
+  }
+  @keyframes revealFade {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-lg);
+    color: var(--c-ink);
+    transition: all var(--dur) var(--ease);
+    border: 1px solid transparent;
+  }
+  .contact-link:hover {
+    background: var(--c-white);
+    border-color: var(--c-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--sh-sm);
+  }
+
+  .contact-link__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--c-white);
+    color: var(--c-accent);
+    flex-shrink: 0;
+  }
+  .contact-link--whatsapp .contact-link__icon {
+    color: #25d366;
+  }
+
+  .contact-link__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .contact-link__label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-muted);
+    font-weight: 600;
+  }
+  .contact-link__value {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--c-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
+<script>
+  const card = document.querySelector('.contact-card') as HTMLElement | null;
+  if (card) {
+    const listingId = card.dataset.listing!;
+    const hidden = card.querySelector('.contact-card__hidden') as HTMLElement;
+    const revealed = card.querySelector('.contact-card__revealed') as HTMLElement;
+    const btn = card.querySelector('#revealBtn') as HTMLButtonElement;
+
+    btn?.addEventListener('click', async () => {
+      hidden.hidden = true;
+      revealed.hidden = false;
+
+      // Fire-and-forget log to API (don't block UX)
+      try {
+        await fetch('/api/reveal-contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listing_id: listingId, contact_type: 'reveal' }),
+          keepalive: true,
+        });
+      } catch {
+        /* ignore — UX must not block on logging */
+      }
+    });
+
+    // Track individual contact clicks
+    card.querySelectorAll<HTMLAnchorElement>('.contact-link').forEach((link) => {
+      link.addEventListener('click', () => {
+        const type = link.dataset.track;
+        try {
+          fetch('/api/reveal-contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ listing_id: listingId, contact_type: type }),
+            keepalive: true,
+          });
+        } catch {
+          /* ignore */
+        }
+      });
+    });
+  }
+</script>

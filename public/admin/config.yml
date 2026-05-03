@@ -1,0 +1,262 @@
+# Decap CMS config — edit content from the browser, commits go to Git.
+# Production: needs GitHub OAuth proxy (see README in this folder).
+# Local dev: run `npx decap-server` in another terminal, then visit /admin/.
+
+backend:
+  name: github
+  repo: REPLACE_WITH/visitpetrovac.com  # e.g. milamedin/visitpetrovac.com
+  branch: main
+  base_url: https://decap-oauth.YOUR-DOMAIN.workers.dev  # OAuth proxy (Cloudflare Worker)
+  open_authoring: false
+
+# Local backend for dev — run `npx decap-server` to enable
+local_backend: true
+
+# Where uploaded media (photos) are stored & served from
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+site_url: https://visitpetrovac.com
+display_url: https://visitpetrovac.com
+logo_url: /favicon.svg
+locale: 'en'  # CMS UI locale (Decap doesn't support sr yet — the content stays sr)
+
+# Auto-merge edits to main
+publish_mode: simple
+
+collections:
+  # ─── Categories ────────────────────────────────────────────────
+  - name: "categories"
+    label: "Kategorije"
+    label_singular: "Kategorija"
+    folder: "src/content/categories"
+    create: true
+    delete: false
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{name}}"
+    fields:
+      - { name: "name", label: "Naziv", widget: "string" }
+      - { name: "description", label: "Opis", widget: "text", required: false }
+      - { name: "icon", label: "Emoji ikona", widget: "string", required: false }
+      - { name: "order", label: "Redosljed", widget: "number", default: 0, value_type: "int" }
+      - { name: "hero_image", label: "Hero slika", widget: "image", required: false, choose_url: false }
+      - { name: "body", label: "Sadržaj", widget: "markdown", required: false }
+
+  # ─── Neighborhoods ─────────────────────────────────────────────
+  - name: "neighborhoods"
+    label: "Naselja"
+    label_singular: "Naselje"
+    folder: "src/content/neighborhoods"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{name}}"
+    fields:
+      - { name: "name", label: "Naziv naselja (npr. Brezine, Buljarica, Krš Medinski)", widget: "string" }
+      - { name: "description", label: "Kratki opis (opciono)", widget: "text", required: false }
+      - { name: "order", label: "Redosljed prikaza u filteru", widget: "number", default: 0, value_type: "int" }
+
+  # ─── Owners ────────────────────────────────────────────────────
+  - name: "owners"
+    label: "Vlasnici"
+    label_singular: "Vlasnik"
+    folder: "src/content/owners"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{name}}"
+    fields:
+      - { name: "name", label: "Ime", widget: "string" }
+      - { name: "email", label: "Email", widget: "string", required: false, pattern: ['^\S+@\S+\.\S+$', 'Mora biti email'] }
+      - { name: "phone", label: "Telefon", widget: "string", required: false }
+      - { name: "whatsapp", label: "WhatsApp (sa kodom zemlje)", widget: "string", required: false }
+      - { name: "photo", label: "Profilna fotografija", widget: "image", required: false, choose_url: false, media_folder: "/public/uploads/owners", public_folder: "/uploads/owners" }
+      - { name: "bio", label: "Kratko o sebi", widget: "text", required: false }
+      - name: "languages"
+        label: "Jezici koje govori"
+        widget: "select"
+        multiple: true
+        default: ["sr"]
+        options:
+          - { label: "Srpski / crnogorski", value: "sr" }
+          - { label: "English", value: "en" }
+          - { label: "Русский", value: "ru" }
+          - { label: "Deutsch", value: "de" }
+          - { label: "Français", value: "fr" }
+          - { label: "Italiano", value: "it" }
+
+  # ─── Listings ──────────────────────────────────────────────────
+  - name: "listings"
+    label: "Listinzi"
+    label_singular: "Listing"
+    folder: "src/content/listings"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}} · {{category}}"
+    sortable_fields: ['title', 'price_from', 'rating']
+    view_filters:
+      - label: "Premium"
+        field: "premium"
+        pattern: true
+    fields:
+      - { name: "title", label: "Naslov", widget: "string" }
+      - name: "category"
+        label: "Kategorija"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+      - name: "owner"
+        label: "Vlasnik (opciono)"
+        widget: "relation"
+        collection: "owners"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
+      - name: "price_unit"
+        label: "Jedinica cijene"
+        widget: "select"
+        default: "per_night"
+        options:
+          - { label: "Po noći", value: "per_night" }
+          - { label: "Po osobi", value: "per_person" }
+          - { label: "Po danu", value: "per_day" }
+          - { label: "Po obroku", value: "per_meal" }
+          - { label: "Fiksno", value: "fixed" }
+      - { name: "premium", label: "Premium pozicija (+150€/god)", widget: "boolean", default: false }
+      - { name: "booking_url", label: "Booking.com link (opciono — za prikaz \"Provjereno na Booking-u\" dugmeta)", widget: "string", required: false, pattern: ['^https?://.+', 'Mora biti validan URL'] }
+      - { name: "youtube_url", label: "YouTube link (opciono — embedovaće video na detail stranici)", widget: "string", required: false, pattern: ['^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Mora biti YouTube URL'] }
+      - name: "accommodation_type"
+        label: "Tip smještaja (samo za kategoriju Smještaj)"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Hotel", value: "hotel" }
+          - { label: "Vila", value: "vila" }
+          - { label: "Kuća", value: "kuca" }
+          - { label: "Apartman", value: "apartman" }
+          - { label: "Soba", value: "soba" }
+      - name: "restaurant_type"
+        label: "Tip restorana (samo za kategoriju Restorani i kafići)"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Restoran", value: "restoran" }
+          - { label: "Konoba", value: "konoba" }
+          - { label: "Pizzeria", value: "pizzeria" }
+          - { label: "Slastičarna", value: "slasticarna" }
+          - { label: "Bar / Kafić", value: "bar" }
+          - { label: "Beach bar", value: "beach-bar" }
+      - name: "activity_type"
+        label: "Tip aktivnosti (samo za kategoriju Aktivnosti)"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Izlet brodom", value: "brod" }
+          - { label: "Kajak / SUP", value: "kajak-sup" }
+          - { label: "Ronjenje", value: "ronjenje" }
+          - { label: "Hiking", value: "hiking" }
+          - { label: "Ribolov", value: "ribolov" }
+          - { label: "Kultura / istorija", value: "kultura" }
+          - { label: "Gastro / kuvanje", value: "gastro" }
+          - { label: "Fotoshooting", value: "foto" }
+      - name: "neighborhood"
+        label: "Naselje (gdje se objekat nalazi)"
+        widget: "relation"
+        collection: "neighborhoods"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - name: "menu_url"
+        label: "Meni / jelovnik (PDF ili slika — za restorane)"
+        widget: "file"
+        required: false
+        media_folder: "/public/uploads/menus"
+        public_folder: "/uploads/menus"
+      - name: "units"
+        label: "Smještajne jedinice (za kuće sa više apartmana ili hotele — ostavi prazno za samostalni objekat)"
+        widget: "list"
+        required: false
+        summary: "{{fields.name}} — {{fields.capacity}} osoba — od {{fields.price_from}}€"
+        fields:
+          - { name: "name", label: "Naziv jedinice (npr. Studio, Dvokrevetna soba, Apartman za 4)", widget: "string" }
+          - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", value_type: "int", min: 1 }
+          - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
+          - { name: "description", label: "Kratki opis (opciono)", widget: "text", required: false }
+          - { name: "image", label: "Fotografija jedinice (jedna)", widget: "image", required: false, media_folder: "/public/uploads/listings", public_folder: "/uploads/listings" }
+      - { name: "amenities", label: "Pogodnosti (slobodno dodaš svoje — npr. Bazen, Igralište, Restoran u sklopu, TV, Klima, WiFi...)", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
+      - name: "images"
+        label: "Fotografije"
+        widget: "list"
+        media_folder: "/public/uploads/listings"
+        public_folder: "/uploads/listings"
+        field: { name: "src", label: "Fotografija", widget: "image" }
+      - { name: "capacity", label: "Kapacitet (broj osoba)", widget: "number", required: false, value_type: "int" }
+      - name: "contact"
+        label: "Kontakt podaci"
+        widget: "object"
+        fields:
+          - { name: "phone", label: "Telefon", widget: "string", required: false }
+          - { name: "whatsapp", label: "WhatsApp", widget: "string", required: false }
+          - { name: "email", label: "Email", widget: "string", required: false }
+          - { name: "website", label: "Sajt (URL)", widget: "string", required: false }
+      - name: "location"
+        label: "Lokacija"
+        widget: "object"
+        required: false
+        fields:
+          - { name: "address", label: "Adresa", widget: "string", required: false }
+          - { name: "lat", label: "Geografska širina", widget: "number", required: false, value_type: "float" }
+          - { name: "lng", label: "Geografska dužina", widget: "number", required: false, value_type: "float" }
+      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
+
+  # ─── Blog posts ────────────────────────────────────────────────
+  - name: "posts"
+    label: "Blog"
+    label_singular: "Blog post"
+    folder: "src/content/posts"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}} · {{published_at | date('DD.MM.YYYY.')}}"
+    sortable_fields: ['published_at', 'title']
+    fields:
+      - { name: "title", label: "Naslov", widget: "string" }
+      - { name: "excerpt", label: "Uvod (max 300 znakova)", widget: "text", pattern: ['.{1,300}', 'Maksimalno 300 znakova'] }
+      - { name: "cover_image", label: "Naslovna fotografija", widget: "image", required: false, media_folder: "/public/uploads/posts", public_folder: "/uploads/posts" }
+      - { name: "published_at", label: "Datum objave", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { name: "author", label: "Autor", widget: "string", default: "VisitPetrovac" }
+      - { name: "tags", label: "Tagovi", widget: "list", required: false }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Tekst", widget: "markdown" }
+
+  # ─── Static pages ──────────────────────────────────────────────
+  - name: "pages"
+    label: "Stranice"
+    label_singular: "Stranica"
+    folder: "src/content/pages"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}}"
+    fields:
+      - { name: "title", label: "Naslov", widget: "string" }
+      - { name: "show_in_menu", label: "Prikazi u glavnom meniju", widget: "boolean", default: false }
+      - { name: "show_in_footer", label: "Prikazi u footer-u", widget: "boolean", default: true }
+      - { name: "order", label: "Redosljed", widget: "number", default: 0, value_type: "int" }
+      - { name: "body", label: "Sadržaj", widget: "markdown" }

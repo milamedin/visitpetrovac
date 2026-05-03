@@ -1,0 +1,338 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import CategoryPill from '../components/CategoryPill.astro';
+import ListingCard from '../components/ListingCard.astro';
+import { useI18n } from '../i18n';
+import { applyTranslation } from '../lib/i18n-content';
+
+const { t, url, locale } = useI18n(Astro);
+
+const categories = (await getCollection('categories'))
+  .map((c) => applyTranslation(c, locale))
+  .sort((a, b) => a.data.order - b.data.order);
+const allListings = (await getCollection('listings', ({ data }) => data.published !== false))
+  .map((l) => applyTranslation(l, locale));
+
+const sortedListings = allListings.sort((a, b) => {
+  const score = (l: typeof a) => (l.data.premium ? 1 : 0);
+  return score(b) - score(a);
+});
+const featured = sortedListings.slice(0, 6);
+
+const categoryMap = new Map(categories.map((c) => [c.id, c.data.name]));
+
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'VisitPetrovac',
+  url: Astro.site!.toString(),
+  logo: new URL('/og-default.jpg', Astro.site).toString(),
+  description: 'Nezavisna turistička platforma za Petrovac na Moru, Crna Gora.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Petrovac',
+    addressRegion: 'Budva',
+    addressCountry: 'ME',
+  },
+  sameAs: [
+    'https://instagram.com/visitpetrovac',
+    'https://facebook.com/visitpetrovac',
+  ],
+};
+
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'VisitPetrovac',
+  url: Astro.site!.toString(),
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${Astro.site!.toString()}search?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+---
+
+<BaseLayout
+  title="VisitPetrovac — Otkrij Petrovac na Moru, Crna Gora"
+  description="Smještaj, restorani, aktivnosti i rent-a-car u Petrovcu na Moru. Rezerviši direktno od vlasnika — bez provizije."
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(orgLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
+  </Fragment>
+  <Hero />
+
+  <!-- ───── Categories + Featured ───── -->
+  <section id="explore" class="section explore">
+    <div class="container">
+      <header class="section-header">
+        <span class="eyebrow">{t('home.explore.eyebrow')}</span>
+        <h2 class="section-title">
+          {t('home.explore.title.before')} <em>{t('home.explore.title.em')}</em> {t('home.explore.title.after')}
+        </h2>
+        <p class="section-lead">{t('home.explore.lead')}</p>
+      </header>
+
+      <div class="scroll-x category-rail">
+        <CategoryPill href={url('/sve')} label={t('home.cat.all')} active />
+        {
+          categories.map((cat) => (
+            <CategoryPill href={url(`/${cat.id}`)} label={cat.data.name} />
+          ))
+        }
+      </div>
+
+      <div class="listings-grid">
+        {
+          featured.map((listing) => (
+            <ListingCard
+              href={url(`/${listing.data.category.id}/${listing.id}`)}
+              title={listing.data.title}
+              excerpt={listing.data.excerpt}
+              image={listing.data.images[0]}
+              category={categoryMap.get(listing.data.category.id)}
+              priceFrom={listing.data.price_from}
+              priceUnit={listing.data.price_unit}
+              rating={listing.data.rating}
+              premium={listing.data.premium}
+              location={listing.data.location?.address}
+            />
+          ))
+        }
+      </div>
+
+      <div class="explore__cta">
+        <a href={url('/smjestaj')} class="btn btn--primary btn--lg">
+          {t('home.explore.cta')}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Why book direct ───── -->
+  <section class="section why">
+    <div class="container">
+      <header class="section-header section-header--center">
+        <span class="eyebrow">{t('home.why.eyebrow')}</span>
+        <h2 class="section-title">
+          {t('home.why.title.line1')} <em>{t('home.why.title.em')}</em>
+        </h2>
+      </header>
+
+      <div class="why__grid">
+        <div class="why__card">
+          <div class="why__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3 class="why__title">{t('home.why1.title')}</h3>
+          <p class="why__text">{t('home.why1.text')}</p>
+        </div>
+
+        <div class="why__card why__card--featured">
+          <div class="why__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="why__title">{t('home.why2.title')}</h3>
+          <p class="why__text">{t('home.why2.text')}</p>
+        </div>
+
+        <div class="why__card">
+          <div class="why__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <h3 class="why__title">{t('home.why3.title')}</h3>
+          <p class="why__text">{t('home.why3.text')}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── CTA for owners ───── -->
+  <section class="section section--tight cta-strip">
+    <div class="container cta-strip__inner">
+      <div class="cta-strip__content">
+        <span class="eyebrow eyebrow--light">{t('home.cta.eyebrow')}</span>
+        <h2 class="cta-strip__title">{t('home.cta.title')}</h2>
+        <p class="cta-strip__lead">{t('home.cta.lead')}</p>
+      </div>
+      <a href={url('/postani-partner')} class="btn btn--accent btn--lg">
+        {t('home.cta.button')}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Section header */
+  .section-header {
+    max-width: 720px;
+    margin-bottom: var(--sp-10);
+  }
+  .section-header--center {
+    margin-inline: auto;
+    text-align: center;
+  }
+  .section-title {
+    font-size: var(--fs-3xl);
+    font-weight: 400;
+    line-height: 1.06;
+    margin-block: var(--sp-2) var(--sp-4);
+    text-wrap: balance;
+  }
+  .section-title em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+  .section-lead {
+    font-size: var(--fs-lg);
+    color: var(--c-ink-soft);
+    line-height: 1.55;
+    max-width: 56ch;
+  }
+  .section-header--center .section-lead {
+    margin-inline: auto;
+  }
+
+  /* Categories rail */
+  .category-rail {
+    margin-bottom: var(--sp-10);
+  }
+
+  /* Listings grid */
+  .listings-grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) {
+    .listings-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1000px) {
+    .listings-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-8);
+    }
+  }
+
+  .explore__cta {
+    margin-top: var(--sp-10);
+    text-align: center;
+  }
+
+  /* Why section */
+  .why {
+    background: linear-gradient(180deg, var(--c-bg) 0%, var(--c-cream-warm) 100%);
+  }
+  .why__grid {
+    display: grid;
+    gap: var(--sp-5);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 760px) {
+    .why__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-6);
+    }
+  }
+  .why__card {
+    padding: var(--sp-8);
+    background: var(--c-white);
+    border-radius: var(--r-2xl);
+    border: 1px solid var(--c-border);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .why__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sh-md);
+  }
+  .why__card--featured {
+    background: var(--c-ink);
+    color: var(--c-cream);
+    border-color: var(--c-ink);
+  }
+  .why__card--featured .why__title,
+  .why__card--featured .why__text {
+    color: var(--c-cream);
+  }
+  .why__card--featured .why__icon {
+    background: var(--c-accent);
+    color: var(--c-cream);
+  }
+  .why__icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    background: var(--c-cream-warm);
+    color: var(--c-ink);
+    border-radius: var(--r-lg);
+    margin-bottom: var(--sp-5);
+  }
+  .why__title {
+    font-size: var(--fs-xl);
+    margin-bottom: var(--sp-2);
+  }
+  .why__text {
+    font-size: var(--fs-base);
+    color: var(--c-ink-soft);
+    line-height: 1.6;
+  }
+  .why__card--featured .why__text {
+    color: rgba(250, 246, 238, 0.78);
+  }
+
+  /* CTA strip */
+  .cta-strip__inner {
+    background: var(--c-ink);
+    color: var(--c-cream);
+    border-radius: var(--r-2xl);
+    padding: clamp(var(--sp-8), 5vw, var(--sp-16));
+    display: grid;
+    gap: var(--sp-8);
+    align-items: center;
+    background-image: radial-gradient(circle at 100% 0%, rgba(196, 95, 60, 0.18), transparent 50%);
+  }
+  .cta-strip__title {
+    color: var(--c-cream);
+    font-size: var(--fs-2xl);
+    margin-block: var(--sp-2) var(--sp-3);
+    line-height: 1.1;
+  }
+  .cta-strip__lead {
+    color: rgba(250, 246, 238, 0.78);
+    font-size: var(--fs-base);
+    line-height: 1.6;
+    max-width: 60ch;
+  }
+  .eyebrow--light {
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 760px) {
+    .cta-strip__inner {
+      grid-template-columns: 1fr auto;
+      gap: var(--sp-12);
+    }
+  }
+</style>

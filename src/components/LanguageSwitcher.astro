@@ -1,0 +1,160 @@
+---
+import { useI18n, locales, localeMeta } from '../i18n';
+
+const { locale, urlFor, pathWithoutLocale, t } = useI18n(Astro);
+const currentMeta = localeMeta[locale];
+---
+
+<div class="lang">
+  <button
+    type="button"
+    class="lang__toggle"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-label={t('nav.languageMenu')}
+    id="langToggle"
+  >
+    <span class="lang__flag" aria-hidden="true">{currentMeta.flag}</span>
+    <span class="lang__label">{currentMeta.displayCode}</span>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
+
+  <ul class="lang__menu" role="menu" hidden id="langMenu">
+    {
+      locales.map((l) => {
+        const meta = localeMeta[l];
+        return (
+          <li role="none">
+            <a
+              href={urlFor(pathWithoutLocale, l)}
+              role="menuitem"
+              class:list={['lang__option', { 'is-active': l === locale }]}
+              hreflang={meta.htmlLang}
+            >
+              <span class="lang__flag" aria-hidden="true">{meta.flag}</span>
+              <span class="lang__option-name">{meta.nativeName}</span>
+              {l === locale && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                  <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              )}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</div>
+
+<style>
+  .lang {
+    position: relative;
+  }
+
+  .lang__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0.5rem 0.75rem 0.5rem 0.625rem;
+    border-radius: var(--r-full);
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink);
+    transition: all var(--dur) var(--ease);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .lang__toggle:hover {
+    border-color: var(--c-ink);
+  }
+  .lang__toggle[aria-expanded='true'] {
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+  }
+
+  .lang__flag {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .lang__label {
+    letter-spacing: 0.04em;
+  }
+
+  .lang__menu {
+    position: absolute;
+    top: calc(100% + var(--sp-2));
+    right: 0;
+    min-width: 200px;
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    padding: var(--sp-2);
+    box-shadow: var(--sh-lg);
+    z-index: 60;
+    list-style: none;
+    margin: 0;
+    animation: langFade var(--dur) var(--ease-out);
+  }
+  .lang__menu[hidden] {
+    display: none;
+  }
+  @keyframes langFade {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .lang__option {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--r-md);
+    color: var(--c-ink);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    transition: background var(--dur) var(--ease);
+  }
+  .lang__option:hover {
+    background: var(--c-cream-warm);
+  }
+  .lang__option.is-active {
+    color: var(--c-accent);
+    background: var(--c-accent-soft);
+  }
+  .lang__option-name {
+    flex: 1;
+  }
+  .lang__option svg {
+    color: var(--c-accent);
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById('langToggle') as HTMLButtonElement | null;
+  const menu = document.getElementById('langMenu') as HTMLElement | null;
+  if (toggle && menu) {
+    const close = () => {
+      toggle.setAttribute('aria-expanded', 'false');
+      menu.hidden = true;
+    };
+    const open = () => {
+      toggle.setAttribute('aria-expanded', 'true');
+      menu.hidden = false;
+    };
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.hidden ? open() : close();
+    });
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target as Node) && e.target !== toggle) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  }
+</script>

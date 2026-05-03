@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBar from '../components/SearchBar.astro';
+import { useI18n } from '../i18n';
+
+const { t, url } = useI18n(Astro);
+---
+
+<BaseLayout
+  title={`404 — VisitPetrovac`}
+  description={t('nf.lead')}
+  noindex={true}
+>
+  <section class="nf">
+    <div class="container nf__inner">
+      <span class="nf__code">404</span>
+      <h1 class="nf__title">{t('nf.title')}</h1>
+      <p class="nf__lead">{t('nf.lead')}</p>
+
+      <div class="nf__search">
+        <SearchBar placeholder={t('nf.searchPlaceholder')} />
+      </div>
+
+      <div class="nf__actions">
+        <a href={url('/')} class="btn btn--primary">{t('nf.cta.home')}</a>
+        <a href={url('/sve')} class="btn btn--ghost">{t('nf.cta.all')}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    min-height: 70svh;
+    display: grid;
+    place-items: center;
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+  .nf__inner {
+    text-align: center;
+    max-width: 640px;
+  }
+  .nf__code {
+    font-family: var(--ff-serif);
+    font-size: clamp(5rem, 16vw, 9rem);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--c-accent);
+    letter-spacing: -0.04em;
+  }
+  .nf__title {
+    margin-top: var(--sp-4);
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+  .nf__lead {
+    margin-top: var(--sp-4);
+    color: var(--c-ink-soft);
+    font-size: var(--fs-lg);
+    line-height: 1.55;
+  }
+  .nf__search {
+    margin-top: var(--sp-8);
+    display: flex;
+    justify-content: center;
+  }
+  .nf__actions {
+    margin-top: var(--sp-6);
+    display: flex;
+    gap: var(--sp-3);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>

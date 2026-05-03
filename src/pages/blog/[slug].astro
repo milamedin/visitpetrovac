@@ -1,0 +1,331 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { useI18n, localeMeta } from '../../i18n';
+import { applyTranslation, renderLocalizedBody } from '../../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect(url('/404'));
+
+const postRaw = await getEntry('posts', slug);
+if (!postRaw || postRaw.data.published === false) return Astro.redirect(url('/404'));
+
+const post = applyTranslation(postRaw, locale);
+const localizedBodyHtml = renderLocalizedBody(postRaw, locale);
+const { Content } = await render(postRaw);
+
+const fmt = new Intl.DateTimeFormat(localeMeta[locale].htmlLang, {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const all = (await getCollection('posts', ({ data }) => data.published !== false))
+  .filter((p) => p.id !== slug)
+  .map((p) => applyTranslation(p, locale))
+  .sort((a, b) => b.data.published_at.getTime() - a.data.published_at.getTime())
+  .slice(0, 2);
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.excerpt,
+  image: post.data.cover_image
+    ? new URL(post.data.cover_image, Astro.site).toString()
+    : undefined,
+  datePublished: post.data.published_at.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: post.data.author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'VisitPetrovac',
+    url: Astro.site!.toString(),
+  },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Početna', item: new URL('/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Vodič', item: new URL('/blog', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: post.data.title },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${post.data.title} — VisitPetrovac`}
+  description={post.data.excerpt}
+  ogImage={post.data.cover_image ?? '/og-default.jpg'}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  </Fragment>
+
+  <article class="post">
+    <div class="container post__header">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href={url('/')}>{t('common.breadcrumbs.home')}</a>
+        <span aria-hidden="true">/</span>
+        <a href={url('/blog')}>{t('blog.eyebrow')}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{post.data.title}</span>
+      </nav>
+
+      <time datetime={post.data.published_at.toISOString()} class="post__date">
+        {fmt.format(post.data.published_at)}
+      </time>
+      <h1 class="post__title">{post.data.title}</h1>
+      <p class="post__excerpt">{post.data.excerpt}</p>
+    </div>
+
+    {post.data.cover_image && (
+      <div class="container">
+        <figure class="post__cover">
+          <img src={post.data.cover_image} alt="" loading="eager" fetchpriority="high" />
+        </figure>
+      </div>
+    )}
+
+    <div class="container post__body">
+      <div class="post__prose">
+        {localizedBodyHtml ? <Fragment set:html={localizedBodyHtml} /> : <Content />}
+      </div>
+
+      {post.data.tags.length > 0 && (
+        <div class="post__tags">
+          <span class="post__tags-label">{t('blog.tags')}</span>
+          {post.data.tags.map((tag) => (
+            <span class="tag">{tag}</span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {all.length > 0 && (
+      <section class="container related">
+        <h2 class="related__title">{t('blog.related')}</h2>
+        <div class="related__grid">
+          {all.map((p) => (
+            <a href={url(`/blog/${p.id}`)} class="related__card">
+              {p.data.cover_image && (
+                <img src={p.data.cover_image} alt="" loading="lazy" />
+              )}
+              <div class="related__body">
+                <span class="related__date">{fmt.format(p.data.published_at)}</span>
+                <h3 class="related__heading">{p.data.title}</h3>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    padding-top: var(--sp-12);
+  }
+
+  .post__header {
+    max-width: 760px;
+    margin-inline: auto;
+    text-align: center;
+    margin-bottom: var(--sp-10);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-muted);
+    margin-bottom: var(--sp-6);
+  }
+  .breadcrumbs a {
+    color: var(--c-muted);
+    transition: color var(--dur) var(--ease);
+  }
+  .breadcrumbs a:hover { color: var(--c-accent); }
+  .breadcrumbs span[aria-current] { color: var(--c-ink); font-weight: 600; }
+
+  .post__date {
+    display: inline-block;
+    font-size: var(--fs-sm);
+    color: var(--c-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    margin-bottom: var(--sp-4);
+  }
+  .post__title {
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    font-weight: 400;
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .post__excerpt {
+    margin-top: var(--sp-5);
+    font-size: var(--fs-lg);
+    color: var(--c-ink-soft);
+    font-family: var(--ff-serif);
+    font-weight: 400;
+    line-height: 1.45;
+    max-width: 60ch;
+    margin-inline: auto;
+  }
+
+  .post__cover {
+    margin: 0 0 var(--sp-12);
+    border-radius: var(--r-2xl);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+  }
+  .post__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .post__body {
+    max-width: 720px;
+    margin-inline: auto;
+    padding-bottom: var(--sp-12);
+  }
+
+  .post__prose {
+    font-size: var(--fs-lg);
+    line-height: 1.7;
+    color: var(--c-ink-soft);
+  }
+  .post__prose :global(h2) {
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    color: var(--c-ink);
+    margin-block: var(--sp-10) var(--sp-4);
+  }
+  .post__prose :global(h3) {
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    color: var(--c-ink);
+    margin-block: var(--sp-8) var(--sp-3);
+  }
+  .post__prose :global(p) {
+    margin-bottom: var(--sp-5);
+  }
+  .post__prose :global(strong) {
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+  .post__prose :global(a) {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .post__prose :global(ul),
+  .post__prose :global(ol) {
+    padding-inline-start: var(--sp-6);
+    margin-bottom: var(--sp-5);
+  }
+  .post__prose :global(ul) { list-style: disc; }
+  .post__prose :global(ol) { list-style: decimal; }
+  .post__prose :global(li) {
+    margin-bottom: var(--sp-2);
+  }
+  .post__prose :global(blockquote) {
+    border-inline-start: 3px solid var(--c-accent);
+    padding-inline-start: var(--sp-5);
+    margin-block: var(--sp-6);
+    font-style: italic;
+    color: var(--c-ink);
+  }
+
+  .post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    align-items: center;
+    margin-top: var(--sp-12);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--c-border);
+  }
+  .post__tags-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-muted);
+    font-weight: 600;
+    margin-inline-end: var(--sp-2);
+  }
+
+  /* Related */
+  .related {
+    margin-block: var(--sp-12) var(--sp-16);
+    padding-top: var(--sp-12);
+    border-top: 1px solid var(--c-border);
+  }
+  .related__title {
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    margin-bottom: var(--sp-6);
+    text-align: center;
+  }
+  .related__grid {
+    display: grid;
+    gap: var(--sp-5);
+    grid-template-columns: 1fr;
+    max-width: 800px;
+    margin-inline: auto;
+  }
+  @media (min-width: 600px) {
+    .related__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .related__card {
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    color: inherit;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .related__card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sh-md);
+  }
+  .related__card img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    width: 100%;
+  }
+  .related__body {
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  }
+  .related__date {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-accent);
+    font-weight: 600;
+  }
+  .related__heading {
+    font-size: var(--fs-lg);
+    font-weight: 500;
+    margin-top: var(--sp-2);
+    line-height: 1.25;
+  }
+</style>

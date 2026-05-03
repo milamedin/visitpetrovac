@@ -1,0 +1,234 @@
+---
+import { useI18n } from '../i18n';
+
+const { t, url } = useI18n(Astro);
+const year = new Date().getFullYear();
+
+const sections = [
+  {
+    heading: t('footer.section.categories'),
+    links: [
+      { href: url('/smjestaj'), label: t('nav.apartments') },
+      { href: url('/restorani'), label: t('nav.restaurants') },
+      { href: url('/aktivnosti'), label: t('nav.tours') },
+      { href: url('/rent-a-car'), label: t('nav.rentacar') },
+    ],
+  },
+  {
+    heading: t('footer.section.guide'),
+    links: [
+      { href: url('/blog'), label: t('footer.guide.guideLink') },
+      { href: url('/vrijeme'), label: 'Vrijeme & prognoza' },
+    ],
+  },
+  {
+    heading: t('footer.section.platform'),
+    links: [
+      { href: url('/info/o-nama'), label: t('footer.platform.about') },
+      { href: url('/postani-partner'), label: t('footer.platform.becomePartner') },
+      { href: url('/info/kontakt'), label: t('footer.platform.contact') },
+      { href: url('/info/uslovi'), label: t('footer.platform.terms') },
+      { href: url('/info/privatnost'), label: t('footer.platform.privacy') },
+    ],
+  },
+];
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__brand">
+      <a href={url('/')} class="footer-logo" aria-label="VisitPetrovac">
+        <span class="footer-logo__name">visit<em>petrovac</em></span>
+      </a>
+      <p class="site-footer__tag">
+        {t('footer.tagline.line1')}<br />
+        <strong>{t('footer.tagline.line2')}</strong>
+      </p>
+
+    </div>
+
+    <nav class="site-footer__nav" aria-label="Footer">
+      {
+        sections.map((section) => (
+          <div class="footer-section">
+            <h4 class="footer-section__heading">{section.heading}</h4>
+            <ul class="footer-section__list">
+              {section.links.map((link) => (
+                <li>
+                  <a href={link.href} class="footer-link">{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </nav>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <p class="copyright">© {year} VisitPetrovac. {t('footer.copyright')}</p>
+    <div class="socials">
+      <a href="https://instagram.com/visitpetrovac" aria-label="Instagram" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="18" height="18" rx="5" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--sp-24);
+    background: var(--c-ink);
+    color: var(--c-cream);
+    padding: var(--sp-16) 0 var(--sp-6);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: var(--sp-12);
+    grid-template-columns: 1fr;
+  }
+
+  .footer-logo__name {
+    font-family: var(--ff-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .footer-logo__name em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+
+  .site-footer__tag {
+    margin-top: var(--sp-4);
+    font-size: var(--fs-sm);
+    color: rgba(250, 246, 238, 0.78);
+    line-height: 1.6;
+    max-width: 32ch;
+  }
+  .site-footer__tag strong {
+    color: var(--c-cream);
+    font-weight: 600;
+  }
+
+  .newsletter {
+    margin-top: var(--sp-6);
+  }
+  .newsletter__label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--c-accent);
+    margin-bottom: var(--sp-3);
+    font-weight: 600;
+  }
+  .newsletter__form {
+    display: flex;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--r-full);
+    padding: 4px;
+    max-width: 360px;
+  }
+  .newsletter__form input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.6rem 1rem;
+    font-size: var(--fs-sm);
+    color: var(--c-cream);
+    outline: none;
+  }
+  .newsletter__form input::placeholder {
+    color: rgba(250, 246, 238, 0.4);
+  }
+  .newsletter__form button {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    background: var(--c-accent);
+    color: var(--c-cream);
+    border-radius: 50%;
+    transition: background var(--dur) var(--ease);
+  }
+  .newsletter__form button:hover {
+    background: var(--c-accent-deep);
+  }
+
+  .site-footer__nav {
+    display: grid;
+    gap: var(--sp-8);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .footer-section__heading {
+    font-family: var(--ff-sans);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--c-cream);
+    margin-bottom: var(--sp-4);
+  }
+
+  .footer-section__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+
+  .footer-link {
+    color: rgba(250, 246, 238, 0.72);
+    font-size: var(--fs-sm);
+    transition: color var(--dur) var(--ease);
+  }
+  .footer-link:hover {
+    color: var(--c-accent);
+  }
+
+  .site-footer__bottom {
+    margin-top: var(--sp-12);
+    padding-top: var(--sp-6);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+  }
+  .copyright {
+    font-size: var(--fs-xs);
+    color: rgba(250, 246, 238, 0.5);
+  }
+  .socials {
+    display: flex;
+    gap: var(--sp-3);
+  }
+  .socials a {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--c-cream);
+    transition: all var(--dur) var(--ease);
+  }
+  .socials a:hover {
+    background: var(--c-accent);
+  }
+
+  @media (min-width: 760px) {
+    .site-footer__inner {
+      grid-template-columns: 1.2fr 2fr;
+      gap: var(--sp-16);
+    }
+  }
+</style>
+

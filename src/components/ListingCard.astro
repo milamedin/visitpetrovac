@@ -1,0 +1,245 @@
+---
+import { useI18n } from '../i18n';
+
+const { t } = useI18n(Astro);
+
+interface Props {
+  href: string;
+  title: string;
+  excerpt?: string;
+  image?: string;
+  category?: string;
+  priceFrom?: number;
+  priceUnit?: 'per_night' | 'per_person' | 'per_day' | 'per_meal' | 'fixed';
+  rating?: number;
+  premium?: boolean;
+  location?: string;
+}
+
+const {
+  href,
+  title,
+  excerpt,
+  image,
+  category,
+  priceFrom,
+  priceUnit = 'per_night',
+  rating,
+  premium = false,
+  location,
+} = Astro.props;
+
+const unitLabel: Record<string, string> = {
+  per_night: t('common.unit.night'),
+  per_person: t('common.unit.person'),
+  per_day: t('common.unit.day'),
+  per_meal: t('common.unit.meal'),
+  fixed: '',
+};
+---
+
+<a href={href} class:list={['lcard', { 'lcard--premium': premium }]}>
+  <div class="lcard__media">
+    {image ? (
+      <img src={image} alt={title} loading="lazy" decoding="async" />
+    ) : (
+      <div class="lcard__placeholder" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="m21 15-5-5L5 21" />
+        </svg>
+      </div>
+    )}
+
+    {premium && (
+      <div class="lcard__badges">
+        <span class="tag tag--featured">{t('common.tag.premium')}</span>
+      </div>
+    )}
+  </div>
+
+  <div class="lcard__body">
+    <div class="lcard__meta">
+      {category && <span class="lcard__category">{category}</span>}
+      {rating !== undefined && (
+        <span class="lcard__rating" aria-label={`Ocjena ${rating} od 5`}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          {rating.toFixed(1)}
+        </span>
+      )}
+    </div>
+
+    <h3 class="lcard__title">{title}</h3>
+
+    {location && (
+      <p class="lcard__location">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linejoin="round" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        {location}
+      </p>
+    )}
+
+    {excerpt && <p class="lcard__excerpt">{excerpt}</p>}
+
+    {priceFrom !== undefined && (
+      <div class="lcard__price">
+        <span class="lcard__price-from">{t('common.from')}</span>
+        <strong>{priceFrom}€</strong>
+        {unitLabel[priceUnit] && <span class="lcard__price-unit">/ {unitLabel[priceUnit]}</span>}
+      </div>
+    )}
+  </div>
+</a>
+
+<style>
+  .lcard {
+    display: flex;
+    flex-direction: column;
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    box-shadow: var(--sh-sm);
+    border: 1px solid var(--c-border);
+    height: 100%;
+    color: inherit;
+  }
+  .lcard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sh-lg);
+    border-color: transparent;
+  }
+  .lcard:hover .lcard__media img {
+    transform: scale(1.06);
+  }
+
+  .lcard--premium {
+    border-color: rgba(196, 95, 60, 0.3);
+  }
+
+  .lcard__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--c-cream-warm);
+  }
+
+  .lcard__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .lcard__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--c-muted-soft);
+  }
+
+  .lcard__badges {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    display: flex;
+    gap: var(--sp-2);
+  }
+
+  .lcard__body {
+    padding: var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    flex: 1;
+  }
+
+  .lcard__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+
+  .lcard__category {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    color: var(--c-accent);
+  }
+
+  .lcard__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+  .lcard__rating svg {
+    color: #f5b942;
+  }
+
+  .lcard__title {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    margin-block: 2px var(--sp-1);
+  }
+
+  .lcard__location {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+  }
+  .lcard__location svg {
+    color: var(--c-accent);
+    flex-shrink: 0;
+  }
+
+  .lcard__excerpt {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lcard__price {
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .lcard__price-from {
+    font-size: var(--fs-xs);
+    color: var(--c-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .lcard__price strong {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    color: var(--c-ink);
+  }
+  .lcard__price-unit {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+  }
+</style>

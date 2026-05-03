@@ -1,0 +1,235 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListingCard from '../components/ListingCard.astro';
+import CategoryPill from '../components/CategoryPill.astro';
+import { useI18n } from '../i18n';
+import { applyTranslation } from '../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const allCategories = (await getCollection('categories'))
+  .map((c) => applyTranslation(c, locale))
+  .sort((a, b) => a.data.order - b.data.order);
+const allListings = (await getCollection('listings', ({ data }) => data.published !== false))
+  .map((l) => applyTranslation(l, locale));
+
+const sortParam = Astro.url.searchParams.get('sort') ?? 'premium';
+const sortedListings = [...allListings].sort((a, b) => {
+  if (sortParam === 'price-asc') return (a.data.price_from ?? Infinity) - (b.data.price_from ?? Infinity);
+  if (sortParam === 'price-desc') return (b.data.price_from ?? 0) - (a.data.price_from ?? 0);
+  if (sortParam === 'rating') return (b.data.rating ?? 0) - (a.data.rating ?? 0);
+  const score = (l: typeof a) => (l.data.premium ? 1 : 0);
+  return score(b) - score(a);
+});
+
+const sortOptions = [
+  { value: 'premium', label: t('cat.sort.recommended') },
+  { value: 'price-asc', label: t('cat.sort.priceAsc') },
+  { value: 'price-desc', label: t('cat.sort.priceDesc') },
+  { value: 'rating', label: t('cat.sort.rating') },
+];
+
+const categoryMap = new Map(allCategories.map((c) => [c.id, c.data.name]));
+---
+
+<BaseLayout
+  title="Svi smjestaji u Petrovcu na Moru — apartmani, restorani, izleti, rent-a-car"
+  description="Kompletan vodič kroz Petrovac na Moru: provjereni apartmani, restorani, izleti i rent-a-car. Direktan kontakt sa vlasnicima, bez provizije."
+>
+  <section class="cat-hero">
+    <div class="cat-hero__media" aria-hidden="true">
+      <img src="/hero-petrovac.jpg" alt="" loading="eager" fetchpriority="high" />
+      <div class="cat-hero__overlay"></div>
+    </div>
+
+    <div class="container cat-hero__inner">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href={url('/')}>{t('common.breadcrumbs.home')}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{t('home.cat.all')}</span>
+      </nav>
+      <h1 class="cat-hero__title">{t('home.cat.all')}</h1>
+      <p class="cat-hero__lead">{t('hero.subtitle')}</p>
+      <div class="cat-hero__meta">
+        <span class="cat-hero__count">
+          <strong>{sortedListings.length}</strong>
+          {sortedListings.length === 1 ? t('cat.count.one') : t('cat.count.many')}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="filter-bar">
+    <div class="container filter-bar__inner">
+      <div class="scroll-x category-rail">
+        <CategoryPill href={url('/sve')} label={t('home.cat.all')} active />
+        {allCategories.map((cat) => (
+          <CategoryPill href={url(`/${cat.id}`)} label={cat.data.name} />
+        ))}
+      </div>
+      <form class="sort-form" method="get">
+        <select name="sort" class="sort-select" onchange="this.form.submit()" aria-label={t('cat.sort.label')}>
+          {sortOptions.map((opt) => (
+            <option value={opt.value} selected={opt.value === sortParam}>{opt.label}</option>
+          ))}
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="listings-grid">
+        {sortedListings.map((l) => (
+          <ListingCard
+            href={url(`/${l.data.category.id}/${l.id}`)}
+            title={l.data.title}
+            excerpt={l.data.excerpt}
+            image={l.data.images[0]}
+            category={categoryMap.get(l.data.category.id)}
+            priceFrom={l.data.price_from}
+            priceUnit={l.data.price_unit}
+            rating={l.data.rating}
+            premium={l.data.premium}
+            location={l.data.location?.address}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cat-hero {
+    position: relative;
+    color: var(--c-cream);
+    padding: clamp(7rem, 14vw, 10rem) 0 clamp(3rem, 7vw, 5rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .cat-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .cat-hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cat-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(7, 59, 76, 0.65) 0%, rgba(7, 59, 76, 0.85) 100%);
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .breadcrumbs a { color: rgba(255, 255, 255, 0.78); }
+  .breadcrumbs span[aria-current] { color: var(--c-cream); font-weight: 600; }
+
+  .cat-hero__title {
+    margin-top: var(--sp-4);
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    color: var(--c-cream);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+  }
+  .cat-hero__lead {
+    margin-top: var(--sp-4);
+    max-width: 60ch;
+    font-size: var(--fs-lg);
+    color: rgba(250, 246, 238, 0.88);
+  }
+  .cat-hero__meta { margin-top: var(--sp-6); }
+  .cat-hero__count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .cat-hero__count strong {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-xl);
+    color: var(--c-cream);
+    font-weight: 400;
+  }
+
+  .filter-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--c-border);
+  }
+  .filter-bar__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
+    padding-block: var(--sp-3);
+  }
+  .category-rail {
+    flex: 1;
+    min-width: 0;
+    margin-inline: 0;
+    padding-inline: 0;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    gap: var(--sp-2);
+  }
+  .category-rail::after { content: none; }
+  .sort-form { flex-shrink: 0; align-self: flex-end; }
+  @media (min-width: 760px) {
+    .filter-bar__inner {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+    .category-rail { flex-wrap: nowrap; }
+    .sort-form { align-self: auto; }
+  }
+  .sort-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--c-white);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--r-full);
+    padding: 0.55rem 2.25rem 0.55rem 1rem;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--c-ink);
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23073b4c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 12px;
+  }
+
+  .listings-grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) {
+    .listings-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .listings-grid { grid-template-columns: repeat(3, 1fr); gap: var(--sp-8); }
+  }
+</style>

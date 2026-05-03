@@ -1,0 +1,855 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Gallery from '../../components/Gallery.astro';
+import ContactReveal from '../../components/ContactReveal.astro';
+import TourBookingForm from '../../components/TourBookingForm.astro';
+import ListingCard from '../../components/ListingCard.astro';
+import { osmEmbedUrl, youtubeId } from '../../lib/utils';
+import { useI18n } from '../../i18n';
+import { applyTranslation, renderLocalizedBody } from '../../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const { category: categorySlug, slug } = Astro.params;
+
+if (!categorySlug || !slug) return Astro.redirect(url('/404'));
+
+const categoryRaw = await getEntry('categories', categorySlug);
+if (!categoryRaw) return Astro.redirect(url('/404'));
+const category = applyTranslation(categoryRaw, locale);
+
+const listingRaw = await getEntry('listings', slug);
+if (!listingRaw || listingRaw.data.category.id !== categorySlug) {
+  return Astro.redirect(url('/404'));
+}
+
+if (listingRaw.data.published === false) {
+  return Astro.redirect(url('/404'));
+}
+
+const listing = applyTranslation(listingRaw, locale);
+const localizedBodyHtml = renderLocalizedBody(listingRaw, locale);
+const { Content } = await render(listingRaw);
+
+const ownerRaw = listingRaw.data.owner ? await getEntry(listingRaw.data.owner) : null;
+const owner = ownerRaw ? applyTranslation(ownerRaw, locale) : null;
+
+// Related listings: same category, exclude current, max 3
+const allInCategory = await getCollection(
+  'listings',
+  ({ data, id }) => data.published !== false && data.category.id === categorySlug && id !== slug,
+);
+const related = allInCategory
+  .map((r) => applyTranslation(r, locale))
+  .sort((a, b) => {
+    const score = (l: typeof a) => (l.data.premium ? 1 : 0);
+    return score(b) - score(a);
+  })
+  .slice(0, 3);
+
+const data = listing.data;
+const ogImage = data.images[0] ?? '/og-default.jpg';
+const hasMap = data.location?.lat !== undefined && data.location?.lng !== undefined;
+const ytId = data.youtube_url ? youtubeId(data.youtube_url) : null;
+
+// JSON-LD schema selection by category
+const schemaTypeMap: Record<string, string> = {
+  smjestaj: 'LodgingBusiness',
+  restorani: 'Restaurant',
+  aktivnosti: 'TouristAttraction',
+  'rent-a-car': 'AutoRental',
+};
+const schemaType = schemaTypeMap[categorySlug] ?? 'LocalBusiness';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': schemaType,
+  name: data.title,
+  description: data.excerpt,
+  image: data.images.map((p) => new URL(p, Astro.site).toString()),
+  ...(data.location?.address && {
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: data.location.address,
+      addressLocality: 'Petrovac',
+      addressCountry: 'ME',
+    },
+  }),
+  ...(data.location?.lat &&
+    data.location?.lng && {
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: data.location.lat,
+        longitude: data.location.lng,
+      },
+    }),
+  ...(data.contact.phone && { telephone: data.contact.phone }),
+  ...(data.contact.email && { email: data.contact.email }),
+  ...(data.contact.website && { url: data.contact.website }),
+  ...(data.rating && {
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: data.rating,
+      bestRating: 5,
+    },
+  }),
+  ...(data.price_from && {
+    priceRange: `od ${data.price_from}€`,
+  }),
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Početna',
+      item: new URL('/', Astro.site).toString(),
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: category.data.name,
+      item: new URL(`/${categorySlug}`, Astro.site).toString(),
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: data.title,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${data.title} — Petrovac na Moru | VisitPetrovac`}
+  description={`${data.excerpt} — ${category.data.name} u Petrovcu na Moru.`}
+  ogImage={ogImage}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  </Fragment>
+
+  <article class="listing">
+    <!-- ───── Header ───── -->
+    <div class="listing__header container">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href={url('/')}>{t('common.breadcrumbs.home')}</a>
+        <span aria-hidden="true">/</span>
+        <a href={url(`/${categorySlug}`)}>{category.data.name}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{data.title}</span>
+      </nav>
+
+      <div class="listing__title-row">
+        <div>
+          <div class="listing__category">{category.data.name}</div>
+          <h1 class="listing__title">{data.title}</h1>
+        </div>
+        {data.premium && (
+          <div class="listing__badges">
+            <span class="tag tag--featured">{t('common.tag.premium')}</span>
+          </div>
+        )}
+      </div>
+
+      <div class="listing__meta">
+        {data.rating !== undefined && (
+          <span class="listing__meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f5b942">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <strong>{data.rating.toFixed(1)}</strong>
+            <span class="text-muted">/ 5</span>
+          </span>
+        )}
+        {data.location?.address && (
+          <span class="listing__meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linejoin="round" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            {data.location.address}
+          </span>
+        )}
+        {data.capacity && (
+          <span class="listing__meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke-linejoin="round" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linejoin="round" />
+            </svg>
+            {data.capacity} ({t('common.unit.person')})
+          </span>
+        )}
+      </div>
+    </div>
+
+    <!-- ───── Gallery ───── -->
+    <div class="container">
+      <Gallery images={data.images} title={data.title} />
+    </div>
+
+    {ytId && (
+      <div class="container">
+        <div class="yt-wrap">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${ytId}?rel=0`}
+            title={`${data.title} — video`}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    )}
+
+    <!-- ───── Body: 2-col on desktop ───── -->
+    <div class="container listing__body">
+      <div class="listing__main">
+        <section class="listing__section">
+          <h2>{t('listing.section.about')}</h2>
+          <div class="listing__excerpt">{data.excerpt}</div>
+          <div class="listing__prose">
+            {localizedBodyHtml ? <Fragment set:html={localizedBodyHtml} /> : <Content />}
+          </div>
+        </section>
+
+        {data.units && data.units.length > 0 && (
+          <section class="listing__section">
+            <h2>Smještajne jedinice</h2>
+            <div class="units">
+              {data.units.map((u) => (
+                <div class:list={['unit', { 'unit--with-image': !!u.image }]}>
+                  {u.image && (
+                    <div class="unit__media">
+                      <img src={u.image} alt={u.name} loading="lazy" />
+                    </div>
+                  )}
+                  <div class="unit__body">
+                    <div class="unit__head">
+                      <h3 class="unit__name">{u.name}</h3>
+                      {u.price_from !== undefined && (
+                        <div class="unit__price">
+                          <span>{t('common.from')}</span>
+                          <strong>{u.price_from}€</strong>
+                        </div>
+                      )}
+                    </div>
+                    <div class="unit__meta">
+                      <span class="unit__capacity">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke-linejoin="round" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linejoin="round" />
+                        </svg>
+                        {u.capacity} {t('common.unit.person')}
+                      </span>
+                    </div>
+                    {u.description && <p class="unit__desc">{u.description}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {data.menu_url && (
+          <a href={data.menu_url} class="menu-link" target="_blank" rel="noopener">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linejoin="round" />
+              <polyline points="14 2 14 8 20 8" stroke-linejoin="round" />
+              <line x1="9" y1="13" x2="15" y2="13" stroke-linecap="round" />
+              <line x1="9" y1="17" x2="15" y2="17" stroke-linecap="round" />
+            </svg>
+            <span>
+              <strong>Pogledaj meni</strong>
+              <small>Kompletan jelovnik sa cijenama</small>
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 7h10v10M7 17l10-10" stroke-linecap="round" />
+            </svg>
+          </a>
+        )}
+
+        {data.booking_url && (
+          <a href={data.booking_url} class="booking-link" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#003580">
+              <path d="M3 3h18v18H3z" opacity="0"/>
+              <text x="12" y="16" text-anchor="middle" fill="#003580" font-size="14" font-weight="bold" font-family="system-ui">B.</text>
+            </svg>
+            <span>
+              <strong>Provjereno na Booking-u</strong>
+              <small>Vidi sve recenzije</small>
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 7h10v10M7 17l10-10" stroke-linecap="round" />
+            </svg>
+          </a>
+        )}
+
+        {data.amenities.length > 0 && (
+          <section class="listing__section">
+            <h2>{t('listing.section.amenities')}</h2>
+            <ul class="amenities">
+              {data.amenities.map((a) => (
+                <li class="amenities__item">
+                  <span class="amenities__check" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                  <span>{a}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {owner && (
+          <section class="listing__section">
+            <h2>{t('listing.section.host')}</h2>
+            <div class="owner-card">
+              {owner.data.photo ? (
+                <img src={owner.data.photo} alt={owner.data.name} class="owner-card__photo" loading="lazy" />
+              ) : (
+                <div class="owner-card__photo owner-card__photo--placeholder" aria-hidden="true">
+                  {owner.data.name.charAt(0)}
+                </div>
+              )}
+              <div class="owner-card__body">
+                <div class="owner-card__name">{owner.data.name}</div>
+                {owner.data.bio && <p class="owner-card__bio">{owner.data.bio}</p>}
+                {owner.data.languages.length > 0 && (
+                  <div class="owner-card__langs">
+                    {t('listing.host.speaks')}: {owner.data.languages.map((l) => l.toUpperCase()).join(' · ')}
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {hasMap && (
+          <section class="listing__section">
+            <h2>{t('listing.section.location')}</h2>
+            <div class="map-wrap">
+              <iframe
+                src={osmEmbedUrl(data.location!.lat!, data.location!.lng!)}
+                title={`Mapa lokacije ${data.title}`}
+                loading="lazy"
+                allowfullscreen
+              ></iframe>
+            </div>
+            {data.location?.address && (
+              <p class="map-address">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linejoin="round" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                {data.location.address}
+              </p>
+            )}
+          </section>
+        )}
+      </div>
+
+      <div class="listing__sidebar">
+        {categorySlug === 'aktivnosti' ? (
+          <TourBookingForm
+            listingId={listing.id}
+            listingTitle={data.title}
+            priceFrom={data.price_from}
+            priceUnit={data.price_unit}
+          />
+        ) : (
+          <ContactReveal
+            listingId={listing.id}
+            phone={data.contact.phone}
+            whatsapp={data.contact.whatsapp}
+            email={data.contact.email}
+            website={data.contact.website}
+            priceFrom={data.price_from}
+            priceUnit={data.price_unit}
+          />
+        )}
+      </div>
+    </div>
+
+    {related.length > 0 && (
+      <section class="container related">
+        <h2 class="related__title">{t('listing.related.before')} <em>{category.data.name}</em></h2>
+        <div class="listings-grid">
+          {related.map((r) => (
+            <ListingCard
+              href={url(`/${r.data.category.id}/${r.id}`)}
+              title={r.data.title}
+              excerpt={r.data.excerpt}
+              image={r.data.images[0]}
+              category={category.data.name}
+              priceFrom={r.data.price_from}
+              priceUnit={r.data.price_unit}
+              rating={r.data.rating}
+              premium={r.data.premium}
+              location={r.data.location?.address}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .listing {
+    padding-top: var(--sp-8);
+  }
+
+  .listing__header {
+    margin-bottom: var(--sp-6);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c-muted);
+    margin-bottom: var(--sp-4);
+  }
+  .breadcrumbs a {
+    color: var(--c-muted);
+    transition: color var(--dur) var(--ease);
+  }
+  .breadcrumbs a:hover {
+    color: var(--c-accent);
+  }
+  .breadcrumbs span[aria-current] {
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+
+  .listing__title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  .listing__category {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+    color: var(--c-accent);
+    margin-bottom: var(--sp-2);
+  }
+  .listing__title {
+    font-size: clamp(1.875rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  .listing__badges {
+    display: flex;
+    gap: var(--sp-2);
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+  }
+
+  .listing__meta {
+    margin-top: var(--sp-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-5);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+  }
+  .listing__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .listing__meta-item svg {
+    color: var(--c-accent);
+    flex-shrink: 0;
+  }
+  .listing__meta-item strong {
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+
+  /* Body grid */
+  .listing__body {
+    margin-top: var(--sp-10);
+    display: grid;
+    gap: var(--sp-10);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 940px) {
+    .listing__body {
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: var(--sp-12);
+    }
+  }
+
+  .listing__sidebar {
+    align-self: start;
+  }
+  @media (min-width: 940px) {
+    .listing__sidebar {
+      position: sticky;
+      top: calc(var(--header-h) + var(--sp-4));
+    }
+  }
+
+  .listing__section {
+    margin-bottom: var(--sp-10);
+  }
+  .listing__section h2 {
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    margin-bottom: var(--sp-5);
+  }
+
+  .listing__excerpt {
+    font-size: var(--fs-lg);
+    color: var(--c-ink-soft);
+    line-height: 1.6;
+    font-family: var(--ff-serif);
+    font-weight: 400;
+    margin-bottom: var(--sp-4);
+  }
+  .listing__prose {
+    font-size: var(--fs-base);
+    line-height: 1.7;
+    color: var(--c-ink-soft);
+  }
+  .listing__prose :global(p) {
+    margin-bottom: var(--sp-4);
+  }
+
+  /* Units */
+  .units {
+    display: grid;
+    gap: var(--sp-3);
+    grid-template-columns: 1fr;
+  }
+  .unit {
+    background: var(--c-cream-warm);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    transition: border-color var(--dur) var(--ease);
+    display: flex;
+    flex-direction: column;
+  }
+  .unit:hover {
+    border-color: var(--c-accent);
+  }
+  .unit__media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--c-border);
+  }
+  .unit__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+  .unit:hover .unit__media img {
+    transform: scale(1.04);
+  }
+  .unit__body {
+    padding: var(--sp-5);
+  }
+  @media (min-width: 720px) {
+    .unit--with-image {
+      flex-direction: row;
+    }
+    .unit--with-image .unit__media {
+      flex: 0 0 240px;
+      aspect-ratio: auto;
+    }
+    .unit--with-image .unit__body {
+      flex: 1;
+    }
+  }
+  .unit__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-2);
+  }
+  .unit__name {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-lg);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .unit__price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .unit__price span {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-muted);
+  }
+  .unit__price strong {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-xl);
+    color: var(--c-ink);
+    font-weight: 500;
+  }
+  .unit__meta {
+    display: flex;
+    gap: var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+  }
+  .unit__capacity {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .unit__capacity svg {
+    color: var(--c-accent);
+  }
+  .unit__desc {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    line-height: 1.55;
+  }
+
+  /* Menu link */
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    margin-bottom: var(--sp-5);
+    background: var(--c-cream-warm);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    color: var(--c-ink);
+    transition: all var(--dur) var(--ease);
+  }
+  .menu-link:hover {
+    border-color: var(--c-accent);
+    background: var(--c-white);
+    transform: translateY(-1px);
+    box-shadow: var(--sh-sm);
+  }
+  .menu-link > svg:first-child {
+    flex-shrink: 0;
+    color: var(--c-accent);
+  }
+  .menu-link span {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .menu-link strong { font-size: var(--fs-base); font-weight: 600; color: var(--c-ink); }
+  .menu-link small { font-size: var(--fs-sm); color: var(--c-muted); }
+
+  /* Booking external link */
+  .booking-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    margin-bottom: var(--sp-10);
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    color: var(--c-ink);
+    transition: all var(--dur) var(--ease);
+  }
+  .booking-link:hover {
+    border-color: #003580;
+    transform: translateY(-1px);
+    box-shadow: var(--sh-sm);
+  }
+  .booking-link svg:first-child {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .booking-link span {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .booking-link strong {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+  .booking-link small {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+  }
+
+  /* Amenities */
+  .amenities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--sp-3);
+  }
+  .amenities__item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+    color: var(--c-ink);
+  }
+  .amenities__check {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    background: var(--c-accent);
+    color: var(--c-cream);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Owner card */
+  .owner-card {
+    display: flex;
+    gap: var(--sp-5);
+    padding: var(--sp-5);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-xl);
+    align-items: flex-start;
+  }
+  .owner-card__photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .owner-card__photo--placeholder {
+    display: grid;
+    place-items: center;
+    background: var(--c-accent);
+    color: var(--c-cream);
+    font-family: var(--ff-serif);
+    font-size: 1.875rem;
+    font-weight: 400;
+  }
+  .owner-card__name {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    margin-bottom: var(--sp-1);
+  }
+  .owner-card__bio {
+    color: var(--c-ink-soft);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    margin-bottom: var(--sp-2);
+  }
+  .owner-card__langs {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c-muted);
+    font-weight: 600;
+  }
+
+  /* YouTube embed */
+  .yt-wrap {
+    margin-top: var(--sp-6);
+    aspect-ratio: 16 / 9;
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    background: var(--c-ink);
+  }
+  .yt-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Map */
+  .map-wrap {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+  }
+  .map-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .map-address {
+    margin-top: var(--sp-3);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .map-address svg {
+    color: var(--c-accent);
+  }
+
+  /* Related */
+  .related {
+    margin-top: var(--sp-16);
+    padding-bottom: var(--sp-12);
+  }
+  .related__title {
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    margin-bottom: var(--sp-6);
+  }
+  .related__title em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+  .listings-grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) {
+    .listings-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1000px) {
+    .listings-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

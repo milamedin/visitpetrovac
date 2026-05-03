@@ -1,0 +1,26 @@
+name = "visitpetrovac"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# ─── D1 database for click logs + tour inquiries ──────────────
+# Bind via Cloudflare dashboard OR `wrangler d1 create visitpetrovac-db` then paste id below.
+# After creating, run `wrangler d1 migrations apply visitpetrovac-db --remote` to apply schema.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "visitpetrovac-db"
+database_id = "REPLACE_WITH_D1_ID"
+migrations_dir = "migrations"
+
+# ─── KV namespace for sessions (used by Astro session API) ─────
+# Create once: `wrangler kv namespace create SESSION`
+[[kv_namespaces]]
+binding = "SESSION"
+id = "REPLACE_WITH_KV_ID"
+
+# ─── Environment variables ─────────────────────────────────────
+# Set secrets via dashboard OR `wrangler secret put GOOGLE_SHEETS_WEBHOOK_URL`.
+# Public vars below; secrets do NOT go here.
+[vars]
+SITE_URL = "https://visitpetrovac.com"

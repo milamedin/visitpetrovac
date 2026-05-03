@@ -1,0 +1,64 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  icon?: string;
+  active?: boolean;
+}
+
+const { href, label, icon, active = false } = Astro.props;
+---
+
+<a href={href} class:list={['cpill', { 'cpill--active': active }]}>
+  {icon && <span class="cpill__icon" aria-hidden="true">{icon}</span>}
+  <span class="cpill__label">{label}</span>
+</a>
+
+<style>
+  .cpill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0 1.125rem;
+    height: 40px;
+    line-height: 1;
+    border-radius: var(--r-full);
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--c-ink-soft);
+    transition: all var(--dur) var(--ease);
+    white-space: nowrap;
+  }
+  .cpill__label {
+    line-height: 1;
+    display: inline-block;
+  }
+
+  .cpill:hover {
+    border-color: var(--c-ink);
+    color: var(--c-ink);
+    transform: translateY(-1px);
+  }
+
+  .cpill--active {
+    background: var(--c-ink);
+    color: var(--c-cream);
+    border-color: var(--c-ink);
+  }
+
+  .cpill__icon {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(13, 46, 63, 0.06);
+    font-size: 14px;
+  }
+
+  .cpill--active .cpill__icon {
+    background: rgba(255, 255, 255, 0.18);
+  }
+</style>

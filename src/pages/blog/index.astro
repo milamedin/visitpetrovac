@@ -1,0 +1,180 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { useI18n, localeMeta } from '../../i18n';
+import { applyTranslation } from '../../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const posts = (await getCollection('posts', ({ data }) => data.published !== false))
+  .map((p) => applyTranslation(p, locale))
+  .sort((a, b) => b.data.published_at.getTime() - a.data.published_at.getTime());
+
+const fmt = new Intl.DateTimeFormat(localeMeta[locale].htmlLang, {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout
+  title={`Vodič kroz Petrovac na Moru — ${t('blog.eyebrow')} | VisitPetrovac`}
+  description="Praktični vodič kroz Petrovac na Moru: parking, plaže, restorani, izleti, vrijeme. Sve što ti treba prije dolaska."
+>
+  <section class="blog-hero">
+    <div class="container blog-hero__inner">
+      <span class="eyebrow">{t('blog.eyebrow')}</span>
+      <h1 class="blog-hero__title">{t('blog.title.before')} <em>{t('blog.title.em')}</em>.</h1>
+      <p class="blog-hero__lead">{t('blog.lead')}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {posts.length === 0 ? (
+        <div class="empty">
+          <h2>{t('blog.empty.title')}</h2>
+          <p>{t('blog.empty.text')}</p>
+        </div>
+      ) : (
+        <div class="posts-grid">
+          {posts.map((post) => (
+            <article class="post-card">
+              <a href={url(`/blog/${post.id}`)} class="post-card__link">
+                <div class="post-card__media">
+                  {post.data.cover_image ? (
+                    <img src={post.data.cover_image} alt={post.data.title} loading="lazy" />
+                  ) : (
+                    <div class="post-card__placeholder" aria-hidden="true" />
+                  )}
+                </div>
+                <div class="post-card__body">
+                  <time datetime={post.data.published_at.toISOString()} class="post-card__date">
+                    {fmt.format(post.data.published_at)}
+                  </time>
+                  <h2 class="post-card__title">{post.data.title}</h2>
+                  <p class="post-card__excerpt">{post.data.excerpt}</p>
+                  {post.data.tags.length > 0 && (
+                    <div class="post-card__tags">
+                      {post.data.tags.slice(0, 3).map((t) => (
+                        <span class="tag">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .blog-hero {
+    background: linear-gradient(135deg, var(--c-cream-warm) 0%, var(--c-bg) 100%);
+    padding: clamp(6rem, 12vw, 9rem) 0 clamp(3rem, 6vw, 5rem);
+  }
+  .blog-hero__title {
+    margin-block: var(--sp-3) var(--sp-4);
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 400;
+    line-height: 1;
+  }
+  .blog-hero__title em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+  .blog-hero__lead {
+    font-size: var(--fs-lg);
+    color: var(--c-ink-soft);
+    max-width: 50ch;
+  }
+
+  .posts-grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 700px) {
+    .posts-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1100px) {
+    .posts-grid { grid-template-columns: repeat(3, 1fr); gap: var(--sp-8); }
+  }
+
+  .post-card {
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sh-lg);
+  }
+  .post-card:hover .post-card__media img {
+    transform: scale(1.05);
+  }
+  .post-card__link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+  }
+
+  .post-card__media {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--c-cream-warm);
+  }
+  .post-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .post-card__body {
+    padding: var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    flex: 1;
+  }
+  .post-card__date {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-accent);
+    font-weight: 600;
+  }
+  .post-card__title {
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+  .post-card__excerpt {
+    color: var(--c-ink-soft);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    flex: 1;
+  }
+  .post-card__tags {
+    display: flex;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+
+  .empty {
+    text-align: center;
+    padding: var(--sp-16) var(--sp-4);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-2xl);
+  }
+</style>

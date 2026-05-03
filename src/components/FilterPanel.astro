@@ -1,0 +1,309 @@
+---
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  /** Type group label (e.g. "Tip smještaja", "Tip", "Tip aktivnosti") */
+  typeLabel: string;
+  typeOptions: Option[];
+  selectedTypes: string[];
+
+  /** Neighborhood options — pass empty array to hide section */
+  neighborhoods: { id: string; name: string }[];
+  selectedNeighborhoods: string[];
+
+  /** Amenity options for this category */
+  amenityOptions: Option[];
+  selectedAmenities: string[];
+
+  /** Price range */
+  priceMin?: number;
+  priceMax?: number;
+  priceLabel?: string;
+
+  /** Preserve current sort */
+  preserveSort?: string;
+
+  /** UI state */
+  activeCount: number;
+  resultCount: number;
+}
+
+const {
+  typeLabel,
+  typeOptions,
+  selectedTypes,
+  neighborhoods,
+  selectedNeighborhoods,
+  amenityOptions,
+  selectedAmenities,
+  priceMin,
+  priceMax,
+  priceLabel = 'Cijena (€)',
+  preserveSort,
+  activeCount,
+  resultCount,
+} = Astro.props;
+---
+
+<aside class="filters" id="filters">
+  <button type="button" class="filters__toggle" aria-expanded="false" aria-controls="filtersForm" id="filtersToggle">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 6h18M6 12h12M10 18h4" stroke-linecap="round" />
+    </svg>
+    <span>Filteri</span>
+    {activeCount > 0 && <span class="filters__badge">{activeCount}</span>}
+  </button>
+
+  <form class="filters__form" method="get" id="filtersForm">
+    {preserveSort && <input type="hidden" name="sort" value={preserveSort} />}
+
+    {typeOptions.length > 0 && (
+      <details class="filter-group" open>
+        <summary>{typeLabel}</summary>
+        <div class="filter-group__body">
+          {typeOptions.map((t) => (
+            <label class="cb">
+              <input type="checkbox" name="type" value={t.value} checked={selectedTypes.includes(t.value)} />
+              <span>{t.label}</span>
+            </label>
+          ))}
+        </div>
+      </details>
+    )}
+
+    {neighborhoods.length > 0 && (
+      <details class="filter-group" open>
+        <summary>Naselje</summary>
+        <div class="filter-group__body">
+          {neighborhoods.map((n) => (
+            <label class="cb">
+              <input type="checkbox" name="n" value={n.id} checked={selectedNeighborhoods.includes(n.id)} />
+              <span>{n.name}</span>
+            </label>
+          ))}
+        </div>
+      </details>
+    )}
+
+    {amenityOptions.length > 0 && (
+      <details class="filter-group">
+        <summary>Pogodnosti</summary>
+        <div class="filter-group__body">
+          {amenityOptions.map((a) => (
+            <label class="cb">
+              <input type="checkbox" name="a" value={a.value} checked={selectedAmenities.includes(a.value)} />
+              <span>{a.label}</span>
+            </label>
+          ))}
+        </div>
+      </details>
+    )}
+
+    <details class="filter-group">
+      <summary>{priceLabel}</summary>
+      <div class="filter-group__body filter-group__body--row">
+        <label class="num">
+          <span>Od</span>
+          <input type="number" name="min" min="0" step="5" value={priceMin ?? ''} placeholder="0" />
+        </label>
+        <label class="num">
+          <span>Do</span>
+          <input type="number" name="max" min="0" step="5" value={priceMax ?? ''} placeholder="∞" />
+        </label>
+      </div>
+    </details>
+
+    <div class="filters__actions">
+      <button type="submit" class="btn btn--primary btn--sm">
+        Prikaži ({resultCount})
+      </button>
+      <a href="?" class="filters__reset">Resetuj</a>
+    </div>
+  </form>
+</aside>
+
+<style>
+  .filters {
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    align-self: start;
+  }
+
+  .filters__toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    width: 100%;
+    padding: var(--sp-3) var(--sp-4);
+    background: transparent;
+    border: 0;
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    color: var(--c-ink);
+    cursor: pointer;
+  }
+  .filters__badge {
+    margin-inline-start: auto;
+    background: var(--c-accent);
+    color: var(--c-cream);
+    border-radius: var(--r-full);
+    font-size: var(--fs-xs);
+    padding: 2px 8px;
+    font-weight: 700;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  .filters__form {
+    display: none;
+    flex-direction: column;
+    border-top: 1px solid var(--c-border);
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+  .filters[data-open] .filters__form {
+    display: flex;
+  }
+
+  .filter-group {
+    border-bottom: 1px solid var(--c-border);
+  }
+  .filter-group:last-of-type {
+    border-bottom: 0;
+  }
+  .filter-group summary {
+    list-style: none;
+    cursor: pointer;
+    padding: var(--sp-3) 0;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-group summary::-webkit-details-marker { display: none; }
+  .filter-group summary::after {
+    content: '+';
+    font-family: var(--ff-serif);
+    font-size: 1.5rem;
+    color: var(--c-muted);
+    line-height: 1;
+    transition: transform var(--dur) var(--ease);
+  }
+  .filter-group[open] summary::after {
+    content: '−';
+  }
+
+  .filter-group__body {
+    padding: 0 0 var(--sp-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .filter-group__body--row {
+    flex-direction: row;
+    gap: var(--sp-3);
+  }
+
+  .cb {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0.4rem 0;
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    cursor: pointer;
+  }
+  .cb input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--c-accent);
+  }
+  .cb:hover { color: var(--c-ink); }
+
+  .num {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .num span {
+    font-size: var(--fs-xs);
+    color: var(--c-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .num input {
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--r-md);
+    padding: 0.5rem 0.75rem;
+    font-size: var(--fs-sm);
+    width: 100%;
+    color: var(--c-ink);
+  }
+  .num input:focus {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 1px;
+    border-color: var(--c-accent);
+  }
+
+  .filters__actions {
+    display: flex;
+    gap: var(--sp-3);
+    align-items: center;
+    margin-top: var(--sp-4);
+  }
+  .filters__reset {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+    text-decoration: underline;
+  }
+  .filters__reset:hover { color: var(--c-accent); }
+  .btn--sm {
+    padding: 0.55rem 1.125rem;
+    font-size: var(--fs-sm);
+  }
+
+  @media (min-width: 940px) {
+    .filters {
+      width: 280px;
+      flex-shrink: 0;
+    }
+    .filters__toggle {
+      display: none;
+    }
+    .filters__form {
+      display: flex;
+      border-top: 0;
+    }
+  }
+</style>
+
+<script>
+  const filters = document.getElementById('filters');
+  const toggle = document.getElementById('filtersToggle');
+  if (filters && toggle) {
+    if (filters.querySelector('.filters__badge')) {
+      filters.setAttribute('data-open', '');
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+    toggle.addEventListener('click', () => {
+      const open = filters.hasAttribute('data-open');
+      if (open) {
+        filters.removeAttribute('data-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      } else {
+        filters.setAttribute('data-open', '');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+</script>

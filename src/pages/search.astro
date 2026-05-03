@@ -1,0 +1,169 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListingCard from '../components/ListingCard.astro';
+import SearchBar from '../components/SearchBar.astro';
+import { useI18n } from '../i18n';
+import { applyTranslation } from '../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const q = (Astro.url.searchParams.get('q') ?? '').trim();
+const allCategories = (await getCollection('categories')).map((c) => applyTranslation(c, locale));
+const categoryMap = new Map(allCategories.map((c) => [c.id, c.data.name]));
+
+let results: Awaited<ReturnType<typeof getCollection<'listings'>>> = [];
+
+if (q.length >= 2) {
+  const needle = q.toLocaleLowerCase('sr');
+  const all = (await getCollection('listings', ({ data }) => data.published !== false)).map((l) =>
+    applyTranslation(l, locale),
+  );
+
+  results = all
+    .map((l) => {
+      const haystack = [
+        l.data.title,
+        l.data.excerpt,
+        l.data.location?.address ?? '',
+        ...l.data.amenities,
+        categoryMap.get(l.data.category.id) ?? '',
+      ]
+        .join(' ')
+        .toLocaleLowerCase('sr');
+
+      let score = 0;
+      if (l.data.title.toLocaleLowerCase('sr').includes(needle)) score += 5;
+      if (haystack.includes(needle)) score += 1;
+      if (l.data.premium) score += 0.5;
+
+      return { listing: l, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((x) => x.listing);
+}
+
+const noQuery = q.length === 0;
+const tooShort = q.length > 0 && q.length < 2;
+---
+
+<BaseLayout
+  title={q ? `${t('common.search.action')}: "${q}" — VisitPetrovac` : `${t('common.search.action')} — VisitPetrovac`}
+  description={t('hero.subtitle')}
+  noindex={true}
+>
+  <section class="search-page">
+    <div class="container">
+      <header class="search-header">
+        <span class="eyebrow">{t('common.search.action')}</span>
+        <h1 class="search-title">
+          {noQuery && t('search.title.empty')}
+          {q && results.length > 0 && (
+            <>
+              <em>{results.length}</em> {t('search.title.results.before')} <em>"{q}"</em>
+            </>
+          )}
+          {q && results.length === 0 && !tooShort && (
+            <>{t('search.title.noResults')} <em>"{q}"</em></>
+          )}
+          {tooShort && t('search.title.tooShort')}
+        </h1>
+
+        <div class="search-bar-wrap">
+          <SearchBar placeholder={t('search.placeholder')} />
+        </div>
+      </header>
+
+      {results.length > 0 && (
+        <div class="listings-grid">
+          {results.map((l) => (
+            <ListingCard
+              href={url(`/${l.data.category.id}/${l.id}`)}
+              title={l.data.title}
+              excerpt={l.data.excerpt}
+              image={l.data.images[0]}
+              category={categoryMap.get(l.data.category.id)}
+              priceFrom={l.data.price_from}
+              priceUnit={l.data.price_unit}
+              rating={l.data.rating}
+              premium={l.data.premium}
+              location={l.data.location?.address}
+            />
+          ))}
+        </div>
+      )}
+
+      {q && results.length === 0 && !tooShort && (
+        <div class="empty">
+          <p>{t('search.empty.text')}</p>
+          <div class="empty__actions">
+            <a href={url('/sve')} class="btn btn--primary">{t('search.empty.allCta')}</a>
+            <a href={url('/')} class="btn btn--ghost">{t('search.empty.homeCta')}</a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .search-page {
+    padding-top: clamp(5rem, 12vw, 7rem);
+    padding-bottom: var(--sp-16);
+  }
+
+  .search-header {
+    margin-bottom: var(--sp-12);
+    max-width: 720px;
+  }
+
+  .search-title {
+    margin-block: var(--sp-3) var(--sp-6);
+    font-size: var(--fs-3xl);
+    font-weight: 400;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .search-title em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+
+  .search-bar-wrap {
+    margin-top: var(--sp-6);
+  }
+
+  .listings-grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) {
+    .listings-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .listings-grid { grid-template-columns: repeat(3, 1fr); gap: var(--sp-8); }
+  }
+
+  .empty {
+    text-align: center;
+    padding: var(--sp-12) var(--sp-4);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-2xl);
+    margin-top: var(--sp-6);
+  }
+  .empty p {
+    color: var(--c-muted);
+    max-width: 50ch;
+    margin: 0 auto var(--sp-6);
+  }
+  .empty__actions {
+    display: flex;
+    gap: var(--sp-3);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>

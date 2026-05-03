@@ -1,0 +1,107 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { useI18n } from '../../i18n';
+import { applyTranslation, renderLocalizedBody } from '../../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect(url('/404'));
+
+const pageRaw = await getEntry('pages', slug);
+if (!pageRaw) return Astro.redirect(url('/404'));
+
+const page = applyTranslation(pageRaw, locale);
+const localizedBodyHtml = renderLocalizedBody(pageRaw, locale);
+const { Content } = await render(pageRaw);
+---
+
+<BaseLayout title={`${page.data.title} — VisitPetrovac`} description={page.data.title}>
+  <article class="static-page">
+    <div class="container static-page__inner">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href={url('/')}>{t('common.breadcrumbs.home')}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{page.data.title}</span>
+      </nav>
+
+      <h1 class="static-page__title">{page.data.title}</h1>
+
+      <div class="static-page__prose">
+        {localizedBodyHtml ? <Fragment set:html={localizedBodyHtml} /> : <Content />}
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .static-page {
+    padding-block: clamp(5rem, 10vw, 8rem);
+  }
+  .static-page__inner {
+    max-width: 760px;
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-muted);
+    margin-bottom: var(--sp-6);
+  }
+  .breadcrumbs a { color: var(--c-muted); }
+  .breadcrumbs a:hover { color: var(--c-accent); }
+  .breadcrumbs span[aria-current] { color: var(--c-ink); font-weight: 600; }
+
+  .static-page__title {
+    font-size: clamp(2.25rem, 6vw, 3.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--sp-8);
+  }
+
+  .static-page__prose {
+    font-size: var(--fs-lg);
+    line-height: 1.7;
+    color: var(--c-ink-soft);
+  }
+  .static-page__prose :global(h2) {
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    color: var(--c-ink);
+    margin-block: var(--sp-10) var(--sp-4);
+  }
+  .static-page__prose :global(h3) {
+    font-size: var(--fs-xl);
+    color: var(--c-ink);
+    margin-block: var(--sp-8) var(--sp-3);
+  }
+  .static-page__prose :global(p) {
+    margin-bottom: var(--sp-5);
+  }
+  .static-page__prose :global(strong) {
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+  .static-page__prose :global(a) {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .static-page__prose :global(ul),
+  .static-page__prose :global(ol) {
+    padding-inline-start: var(--sp-6);
+    margin-bottom: var(--sp-5);
+  }
+  .static-page__prose :global(ul) { list-style: disc; }
+  .static-page__prose :global(ol) { list-style: decimal; }
+  .static-page__prose :global(li) { margin-bottom: var(--sp-2); }
+</style>

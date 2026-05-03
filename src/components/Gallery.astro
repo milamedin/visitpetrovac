@@ -1,0 +1,352 @@
+---
+interface Props {
+  images: string[];
+  title: string;
+}
+
+const { images, title } = Astro.props;
+const main = images[0];
+const rest = images.slice(1, 5);
+const remaining = Math.max(0, images.length - 5);
+---
+
+{
+  images.length === 0 ? (
+    <div class="gallery gallery--empty">
+      <div class="gallery__placeholder">Bez fotografije</div>
+    </div>
+  ) : (
+    <>
+      <div class:list={['gallery', { 'gallery--single': images.length === 1 }]}>
+        <button
+          type="button"
+          class="gallery__main"
+          data-lightbox-open
+          data-index="0"
+          aria-label={`${title} — fotografija 1, klikni za uvećanje`}
+        >
+          <img src={main} alt={`${title} — glavna fotografija`} loading="eager" fetchpriority="high" />
+          <span class="gallery__zoom" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" stroke-linecap="round" />
+              <path d="M11 8v6M8 11h6" stroke-linecap="round" />
+            </svg>
+          </span>
+        </button>
+        {rest.length > 0 && (
+          <div class="gallery__grid">
+            {rest.map((src, i) => (
+              <button
+                type="button"
+                class:list={['gallery__thumb', { 'gallery__thumb--more': i === rest.length - 1 && remaining > 0 }]}
+                data-lightbox-open
+                data-index={i + 1}
+                aria-label={`${title} — fotografija ${i + 2}, klikni za uvećanje`}
+              >
+                <img src={src} alt={`${title} — fotografija ${i + 2}`} loading="lazy" />
+                {i === rest.length - 1 && remaining > 0 && (
+                  <span class="gallery__more">+{remaining}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Hidden data store for the lightbox JS */}
+      <script type="application/json" id="gallery-data" set:html={JSON.stringify(images)} />
+
+      {/* Lightbox overlay */}
+      <div class="lightbox" id="lightbox" hidden>
+        <button class="lightbox__close" aria-label="Zatvori" data-lightbox-close>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button class="lightbox__nav lightbox__nav--prev" aria-label="Prethodna" data-lightbox-prev>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button class="lightbox__nav lightbox__nav--next" aria-label="Sljedeća" data-lightbox-next>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="lightbox__viewport">
+          <img class="lightbox__img" id="lightboxImg" alt="" />
+        </div>
+        <div class="lightbox__counter" id="lightboxCounter"></div>
+      </div>
+    </>
+  )
+}
+
+<style>
+  .gallery {
+    display: grid;
+    gap: var(--sp-2);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+  }
+
+  .gallery--single .gallery__main {
+    aspect-ratio: 16 / 10;
+  }
+
+  @media (min-width: 760px) {
+    .gallery {
+      grid-template-columns: 2fr 1fr;
+    }
+    .gallery--single {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gallery__main,
+  .gallery__thumb {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--c-cream-warm);
+    border: 0;
+    padding: 0;
+    cursor: zoom-in;
+    width: 100%;
+  }
+  .gallery__main {
+    aspect-ratio: 4 / 3;
+  }
+  .gallery__main img,
+  .gallery__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+  .gallery__main:hover img,
+  .gallery__thumb:hover img {
+    transform: scale(1.04);
+  }
+
+  .gallery__zoom {
+    position: absolute;
+    bottom: var(--sp-3);
+    right: var(--sp-3);
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: rgba(7, 59, 76, 0.85);
+    color: var(--c-cream);
+    border-radius: 50%;
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+  .gallery__main:hover .gallery__zoom {
+    opacity: 1;
+  }
+
+  .gallery__grid {
+    display: none;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-2);
+  }
+
+  @media (min-width: 760px) {
+    .gallery__main {
+      aspect-ratio: auto;
+      height: 100%;
+    }
+    .gallery__grid {
+      display: grid;
+    }
+  }
+
+  .gallery__thumb--more::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 59, 76, 0.6);
+  }
+
+  .gallery__more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--c-cream);
+    font-family: var(--ff-serif);
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    z-index: 1;
+  }
+
+  .gallery--empty {
+    display: grid;
+    place-items: center;
+    background: var(--c-cream-warm);
+    aspect-ratio: 16 / 10;
+    color: var(--c-muted);
+  }
+  .gallery__placeholder {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-lg);
+  }
+
+  /* ───── Lightbox overlay ───── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 59, 76, 0.96);
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    animation: lbFade 200ms var(--ease-out);
+  }
+  .lightbox[hidden] {
+    display: none;
+  }
+  @keyframes lbFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .lightbox__viewport {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: var(--sp-12) var(--sp-4);
+    box-sizing: border-box;
+  }
+  .lightbox__img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--r-md);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+
+  .lightbox__close,
+  .lightbox__nav {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--c-cream);
+    border-radius: 50%;
+    backdrop-filter: blur(8px);
+    transition: background var(--dur) var(--ease);
+    z-index: 1;
+  }
+  .lightbox__close:hover,
+  .lightbox__nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .lightbox__close {
+    top: var(--sp-4);
+    right: var(--sp-4);
+  }
+  .lightbox__nav--prev {
+    left: var(--sp-4);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .lightbox__nav--next {
+    right: var(--sp-4);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox__counter {
+    position: absolute;
+    bottom: var(--sp-4);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--c-cream);
+    border-radius: var(--r-full);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+  }
+
+  body.lightbox-open {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const dataEl = document.getElementById('gallery-data');
+  if (dataEl) {
+    const images: string[] = JSON.parse(dataEl.textContent || '[]');
+    const overlay = document.getElementById('lightbox') as HTMLElement | null;
+    const img = document.getElementById('lightboxImg') as HTMLImageElement | null;
+    const counter = document.getElementById('lightboxCounter') as HTMLElement | null;
+
+    if (overlay && img && counter && images.length > 0) {
+      let current = 0;
+
+      const render = () => {
+        img.src = images[current];
+        counter.textContent = `${current + 1} / ${images.length}`;
+      };
+
+      const open = (idx: number) => {
+        current = idx;
+        render();
+        overlay.hidden = false;
+        document.body.classList.add('lightbox-open');
+      };
+      const close = () => {
+        overlay.hidden = true;
+        document.body.classList.remove('lightbox-open');
+      };
+      const next = () => { current = (current + 1) % images.length; render(); };
+      const prev = () => { current = (current - 1 + images.length) % images.length; render(); };
+
+      document.querySelectorAll<HTMLButtonElement>('[data-lightbox-open]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const idx = Number(btn.dataset.index ?? 0);
+          open(idx);
+        });
+      });
+      overlay.querySelector('[data-lightbox-close]')?.addEventListener('click', close);
+      overlay.querySelector('[data-lightbox-prev]')?.addEventListener('click', prev);
+      overlay.querySelector('[data-lightbox-next]')?.addEventListener('click', next);
+
+      // Click backdrop
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) close();
+      });
+
+      // Keyboard
+      document.addEventListener('keydown', (e) => {
+        if (overlay.hidden) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
+      });
+
+      // Touch swipe
+      let startX = 0;
+      overlay.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+      overlay.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 50) {
+          dx > 0 ? prev() : next();
+        }
+      });
+    }
+  }
+</script>

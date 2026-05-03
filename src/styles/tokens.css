@@ -1,0 +1,78 @@
+:root {
+  /* Brand palette — turquoise / blue / white */
+  --c-ink: #073b4c;          /* deep ocean — headings, primary text */
+  --c-ink-soft: #1f5a6b;     /* softer ink for body */
+  --c-accent: #0fa3a3;       /* turquoise — CTAs, italics, highlights */
+  --c-accent-deep: #0c8585;  /* hover state */
+  --c-accent-soft: #e5f7f6;  /* turquoise tint backgrounds */
+
+  --c-blue: #1d6ea6;         /* mediterranean blue — secondary accent */
+  --c-blue-deep: #134e7d;
+  --c-blue-soft: #e5f0f8;
+
+  --c-cream: #ffffff;        /* white */
+  --c-cream-warm: #f1f8f9;   /* whisper-soft teal tint for cards / surfaces */
+
+  /* Neutrals */
+  --c-white: #ffffff;
+  --c-bg: #ffffff;
+  --c-surface: #ffffff;
+  --c-border: rgba(7, 59, 76, 0.10);
+  --c-border-strong: rgba(7, 59, 76, 0.18);
+  --c-muted: #5f7e89;
+  --c-muted-soft: #9bb0b8;
+
+  /* Type scale (mobile-first, fluid) */
+  --fs-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.8125rem);
+  --fs-sm: clamp(0.875rem, 0.85rem + 0.15vw, 0.9375rem);
+  --fs-base: clamp(1rem, 0.97rem + 0.2vw, 1.0625rem);
+  --fs-lg: clamp(1.125rem, 1.08rem + 0.25vw, 1.25rem);
+  --fs-xl: clamp(1.375rem, 1.3rem + 0.4vw, 1.625rem);
+  --fs-2xl: clamp(1.75rem, 1.6rem + 0.7vw, 2.25rem);
+  --fs-3xl: clamp(2.25rem, 2rem + 1.4vw, 3.25rem);
+  --fs-4xl: clamp(2.75rem, 2.3rem + 2.5vw, 4.5rem);
+
+  /* Spacing scale */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-20: 5rem;
+  --sp-24: 6rem;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+  --r-full: 999px;
+
+  /* Shadows — soft and cool */
+  --sh-sm: 0 1px 2px rgba(7, 59, 76, 0.06);
+  --sh-md: 0 4px 16px rgba(7, 59, 76, 0.08);
+  --sh-lg: 0 12px 40px rgba(7, 59, 76, 0.12);
+  --sh-xl: 0 24px 60px rgba(7, 59, 76, 0.16);
+
+  /* Layout */
+  --container-max: 1200px;
+  --container-px: clamp(1rem, 4vw, 2rem);
+  --header-h: 64px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur: 240ms;
+  --dur-slow: 420ms;
+
+  /* Type families */
+  --ff-serif: 'Fraunces', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --ff-sans: 'Inter Tight', -apple-system, 'Segoe UI', system-ui, sans-serif;
+}

@@ -1,0 +1,518 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListingCard from '../components/ListingCard.astro';
+import CategoryPill from '../components/CategoryPill.astro';
+import FilterPanel from '../components/FilterPanel.astro';
+import { useI18n } from '../i18n';
+import { applyTranslation } from '../lib/i18n-content';
+
+export const prerender = false;
+
+const { t, url, locale } = useI18n(Astro);
+
+const { category: slug } = Astro.params;
+
+if (!slug) return Astro.redirect(url('/404'));
+
+const categoryRaw = await getEntry('categories', slug);
+if (!categoryRaw) return Astro.redirect(url('/404'));
+const category = applyTranslation(categoryRaw, locale);
+
+const allCategories = (await getCollection('categories'))
+  .map((c) => applyTranslation(c, locale))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const allListings = (await getCollection(
+  'listings',
+  ({ data }) => data.published !== false && data.category.id === slug,
+)).map((l) => applyTranslation(l, locale));
+
+// ─── Filters config per category ──────────────────────────────────
+type FilterCfg = {
+  typeLabel: string;
+  typeField: 'accommodation_type' | 'restaurant_type' | 'activity_type';
+  typeOptions: { value: string; label: string }[];
+  amenities: { value: string; label: string }[];
+  withNeighborhoods: boolean;
+  priceLabel: string;
+};
+const FILTER_CONFIG: Record<string, FilterCfg> = {
+  smjestaj: {
+    typeLabel: 'Tip smještaja',
+    typeField: 'accommodation_type',
+    typeOptions: [
+      { value: 'hotel', label: 'Hotel' },
+      { value: 'vila', label: 'Vila' },
+      { value: 'kuca', label: 'Kuća' },
+      { value: 'apartman', label: 'Apartman' },
+      { value: 'soba', label: 'Soba' },
+    ],
+    amenities: [
+      { value: 'parking', label: 'Parking' },
+      { value: 'bazen', label: 'Bazen' },
+      { value: 'klima', label: 'Klima' },
+      { value: 'wifi', label: 'WiFi' },
+      { value: 'kuhinja', label: 'Kuhinja' },
+      { value: 'mašina za veš', label: 'Mašina za veš' },
+      { value: 'mašina za sudje', label: 'Mašina za sudje' },
+      { value: 'doručak', label: 'Doručak uključen' },
+      { value: 'pogled na more', label: 'Pogled na more' },
+      { value: 'terasa', label: 'Terasa' },
+      { value: 'roštilj', label: 'Roštilj' },
+      { value: 'lift', label: 'Lift' },
+    ],
+    withNeighborhoods: true,
+    priceLabel: 'Cijena (€/noć)',
+  },
+  restorani: {
+    typeLabel: 'Tip',
+    typeField: 'restaurant_type',
+    typeOptions: [
+      { value: 'restoran', label: 'Restoran' },
+      { value: 'konoba', label: 'Konoba' },
+      { value: 'pizzeria', label: 'Pizzeria' },
+      { value: 'slasticarna', label: 'Slastičarna' },
+      { value: 'bar', label: 'Bar / Kafić' },
+      { value: 'beach-bar', label: 'Beach bar' },
+    ],
+    amenities: [
+      { value: 'terasa', label: 'Letnja bašta / terasa' },
+      { value: 'parking', label: 'Parking' },
+      { value: 'dostava', label: 'Dostava' },
+      { value: 'vegetarijan', label: 'Vegetarijanske opcije' },
+      { value: 'dječiji', label: 'Dječiji meni' },
+      { value: 'pogled', label: 'Pogled na more' },
+      { value: 'riblji', label: 'Riblji specijaliteti' },
+      { value: 'live', label: 'Live muzika' },
+      { value: 'domaće vino', label: 'Domaće vino' },
+    ],
+    withNeighborhoods: true,
+    priceLabel: 'Cijena obroka (€)',
+  },
+  aktivnosti: {
+    typeLabel: 'Tip aktivnosti',
+    typeField: 'activity_type',
+    typeOptions: [
+      { value: 'brod', label: 'Izlet brodom' },
+      { value: 'kajak-sup', label: 'Kajak / SUP' },
+      { value: 'ronjenje', label: 'Ronjenje' },
+      { value: 'hiking', label: 'Hiking' },
+      { value: 'ribolov', label: 'Ribolov' },
+      { value: 'kultura', label: 'Kultura / istorija' },
+      { value: 'gastro', label: 'Gastro / kuvanje' },
+      { value: 'foto', label: 'Fotoshooting' },
+    ],
+    amenities: [
+      { value: 'profesionalni vodič', label: 'Profesionalni vodič' },
+      { value: 'oprema', label: 'Oprema uključena' },
+      { value: 'transport', label: 'Transport uključen' },
+      { value: 'ručak', label: 'Ručak uključen' },
+      { value: 'voda', label: 'Voda i osvježenje' },
+      { value: 'mala grupa', label: 'Mala grupa' },
+      { value: 'cjelodnev', label: 'Cjelodnevno' },
+      { value: 'romantič', label: 'Romantična atmosfera' },
+    ],
+    withNeighborhoods: false,
+    priceLabel: 'Cijena (€)',
+  },
+};
+
+const filterCfg = FILTER_CONFIG[slug];
+const params = Astro.url.searchParams;
+const selectedTypes = params.getAll('type');
+const selectedNeighborhoods = params.getAll('n');
+const selectedAmenities = params.getAll('a');
+const priceMinRaw = params.get('min');
+const priceMaxRaw = params.get('max');
+const priceMin = priceMinRaw ? Number(priceMinRaw) : undefined;
+const priceMax = priceMaxRaw ? Number(priceMaxRaw) : undefined;
+
+const activeFilterCount =
+  selectedTypes.length +
+  selectedNeighborhoods.length +
+  selectedAmenities.length +
+  (priceMin !== undefined ? 1 : 0) +
+  (priceMax !== undefined ? 1 : 0);
+
+const filteredListings = filterCfg
+  ? allListings.filter((l) => {
+      if (selectedTypes.length > 0) {
+        const t = l.data[filterCfg.typeField];
+        if (!t || !selectedTypes.includes(t)) return false;
+      }
+      if (filterCfg.withNeighborhoods && selectedNeighborhoods.length > 0) {
+        const n = l.data.neighborhood?.id;
+        if (!n || !selectedNeighborhoods.includes(n)) return false;
+      }
+      if (selectedAmenities.length > 0) {
+        const lower = l.data.amenities.map((a) => a.toLowerCase());
+        const hasAll = selectedAmenities.every((a) =>
+          lower.some((x) => x.includes(a.toLowerCase())),
+        );
+        if (!hasAll) return false;
+      }
+      if (priceMin !== undefined && (l.data.price_from ?? Infinity) < priceMin) return false;
+      if (priceMax !== undefined && (l.data.price_from ?? 0) > priceMax) return false;
+      return true;
+    })
+  : allListings;
+
+const neighborhoodOptions = filterCfg?.withNeighborhoods
+  ? (await getCollection('neighborhoods'))
+      .map((n) => applyTranslation(n, locale))
+      .sort((a, b) => a.data.order - b.data.order)
+      .map((n) => ({ id: n.id, name: n.data.name }))
+  : [];
+
+const sortParam = params.get('sort') ?? 'premium';
+const sortedListings = [...filteredListings].sort((a, b) => {
+  if (sortParam === 'price-asc') return (a.data.price_from ?? Infinity) - (b.data.price_from ?? Infinity);
+  if (sortParam === 'price-desc') return (b.data.price_from ?? 0) - (a.data.price_from ?? 0);
+  if (sortParam === 'rating') return (b.data.rating ?? 0) - (a.data.rating ?? 0);
+  const score = (l: typeof a) => (l.data.premium ? 1 : 0);
+  return score(b) - score(a);
+});
+
+const sortOptions = [
+  { value: 'premium', label: t('cat.sort.recommended') },
+  { value: 'price-asc', label: t('cat.sort.priceAsc') },
+  { value: 'price-desc', label: t('cat.sort.priceDesc') },
+  { value: 'rating', label: t('cat.sort.rating') },
+];
+
+const heroImage = category.data.hero_image ?? '/hero-petrovac.jpg';
+---
+
+<BaseLayout
+  title={`${category.data.name} u Petrovcu na Moru — VisitPetrovac`}
+  description={`${category.data.name} u Petrovcu na Moru, Crna Gora. ${category.data.description ?? ''}`}
+>
+  <!-- ───── Category hero ───── -->
+  <section class="cat-hero">
+    <div class="cat-hero__media" aria-hidden="true">
+      <img src={heroImage} alt="" loading="eager" fetchpriority="high" />
+      <div class="cat-hero__overlay"></div>
+    </div>
+
+    <div class="container cat-hero__inner">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href={url('/')}>{t('common.breadcrumbs.home')}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{category.data.name}</span>
+      </nav>
+
+      <h1 class="cat-hero__title">{category.data.name}</h1>
+      {category.data.description && (
+        <p class="cat-hero__lead">{category.data.description}</p>
+      )}
+
+      <div class="cat-hero__meta">
+        <span class="cat-hero__count">
+          <strong>{sortedListings.length}</strong>
+          {sortedListings.length === 1 ? t('cat.count.one') : t('cat.count.many')}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Sticky filter bar ───── -->
+  <div class="filter-bar">
+    <div class="container filter-bar__inner">
+      <div class="scroll-x category-rail">
+        <CategoryPill href={url('/sve')} label={t('home.cat.all')} />
+        {
+          allCategories.map((cat) => (
+            <CategoryPill
+              href={url(`/${cat.id}`)}
+              label={cat.data.name}
+              active={cat.id === slug}
+            />
+          ))
+        }
+      </div>
+
+      <form class="sort-form" method="get">
+        <label for="sort" class="visually-hidden">{t('cat.sort.label')}</label>
+        <select name="sort" id="sort" class="sort-select" onchange="this.form.submit()">
+          {
+            sortOptions.map((opt) => (
+              <option value={opt.value} selected={opt.value === sortParam}>
+                {opt.label}
+              </option>
+            ))
+          }
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <!-- ───── Listings grid ───── -->
+  <section class="section section--tight">
+    <div class:list={['container', { 'with-filters': !!filterCfg }]}>
+      {filterCfg && (
+        <FilterPanel
+          typeLabel={filterCfg.typeLabel}
+          typeOptions={filterCfg.typeOptions}
+          selectedTypes={selectedTypes}
+          neighborhoods={neighborhoodOptions}
+          selectedNeighborhoods={selectedNeighborhoods}
+          amenityOptions={filterCfg.amenities}
+          selectedAmenities={selectedAmenities}
+          priceMin={priceMin}
+          priceMax={priceMax}
+          priceLabel={filterCfg.priceLabel}
+          preserveSort={sortParam !== 'premium' ? sortParam : undefined}
+          activeCount={activeFilterCount}
+          resultCount={sortedListings.length}
+        />
+      )}
+
+      <div class="listings-area">
+        {sortedListings.length === 0 ? (
+          <div class="empty">
+            <h2>{activeFilterCount > 0 ? 'Nema rezultata za izabrane filtere.' : t('cat.empty.title')}</h2>
+            <p>{activeFilterCount > 0 ? 'Probaj sa manje filtera ili reset.' : t('cat.empty.text')}</p>
+            <a href={url('/')} class="btn btn--primary">{t('cat.empty.cta')}</a>
+          </div>
+        ) : (
+          <div class="listings-grid">
+            {sortedListings.map((listing) => (
+              <ListingCard
+                href={url(`/${listing.data.category.id}/${listing.id}`)}
+                title={listing.data.title}
+                excerpt={listing.data.excerpt}
+                image={listing.data.images[0]}
+                category={category.data.name}
+                priceFrom={listing.data.price_from}
+                priceUnit={listing.data.price_unit}
+                rating={listing.data.rating}
+                premium={listing.data.premium}
+                location={listing.data.location?.address}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cat-hero {
+    position: relative;
+    color: var(--c-cream);
+    padding: clamp(7rem, 14vw, 10rem) 0 clamp(3rem, 7vw, 5rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .cat-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .cat-hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cat-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(7, 59, 76, 0.65) 0%, rgba(7, 59, 76, 0.85) 100%),
+      linear-gradient(135deg, rgba(7, 59, 76, 0.55) 0%, transparent 60%);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .breadcrumbs a {
+    color: rgba(255, 255, 255, 0.78);
+    transition: color var(--dur) var(--ease);
+  }
+  .breadcrumbs a:hover {
+    color: var(--c-cream);
+  }
+  .breadcrumbs span[aria-current] {
+    color: var(--c-cream);
+    font-weight: 600;
+  }
+
+  .cat-hero__title {
+    margin-top: var(--sp-4);
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    color: var(--c-cream);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+  }
+  .cat-hero__lead {
+    margin-top: var(--sp-4);
+    max-width: 60ch;
+    font-size: var(--fs-lg);
+    color: rgba(250, 246, 238, 0.88);
+  }
+  .cat-hero__meta {
+    margin-top: var(--sp-6);
+  }
+  .cat-hero__count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .cat-hero__count strong {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-xl);
+    color: var(--c-cream);
+    font-weight: 400;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--c-border);
+  }
+  .filter-bar__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
+    padding-block: var(--sp-3);
+  }
+  .category-rail {
+    flex: 1;
+    min-width: 0;
+    margin-inline: 0;
+    padding-inline: 0;
+    /* Override .scroll-x: on mobile we want pills to WRAP (2 rows) instead of horizontal scroll */
+    flex-wrap: wrap;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    gap: var(--sp-2);
+  }
+  .category-rail::after {
+    content: none;
+  }
+  .sort-form {
+    align-self: flex-end;
+  }
+  @media (min-width: 760px) {
+    .filter-bar__inner {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+    .category-rail {
+      flex-wrap: nowrap;
+    }
+    .sort-form {
+      align-self: auto;
+    }
+  }
+
+  .sort-form {
+    flex-shrink: 0;
+  }
+  .sort-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--c-white);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--r-full);
+    padding: 0.55rem 2.25rem 0.55rem 1rem;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--c-ink);
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23073b4c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 12px;
+    transition: border-color var(--dur) var(--ease);
+  }
+  .sort-select:hover {
+    border-color: var(--c-ink);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Listings grid */
+  .listings-area {
+    flex: 1;
+    min-width: 0;
+  }
+  .with-filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  @media (min-width: 940px) {
+    .with-filters {
+      flex-direction: row;
+      gap: var(--sp-8);
+      align-items: flex-start;
+    }
+  }
+  .listings-grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) {
+    .listings-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1000px) {
+    .listings-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-6);
+    }
+    /* When no filter sidebar: 3 columns */
+    .container:not(.with-filters) .listings-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-8);
+    }
+  }
+
+  .empty {
+    text-align: center;
+    padding: var(--sp-16) var(--sp-4);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-2xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    align-items: center;
+  }
+  .empty h2 {
+    font-size: var(--fs-xl);
+    margin-bottom: 0;
+  }
+  .empty p {
+    color: var(--c-muted);
+    max-width: 40ch;
+  }
+</style>

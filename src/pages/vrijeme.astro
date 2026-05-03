@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WeatherWidget from '../components/WeatherWidget.astro';
+import { useI18n } from '../i18n';
+import { getWeather } from '../lib/weather';
+
+export const prerender = false;
+
+const { url } = useI18n(Astro);
+const data = await getWeather();
+
+const seaTemp = data?.sea?.temperature;
+
+const tideInfo = [
+  { month: 'maj', sea: '19—21°C', air: '22—25°C', verdict: 'More postaje prijatno za većinu' },
+  { month: 'jun', sea: '22—24°C', air: '26—29°C', verdict: 'Idealno — toplo, ali ne preopterećeno' },
+  { month: 'jul', sea: '24—26°C', air: '29—33°C', verdict: 'Vrhunac sezone, more savršeno' },
+  { month: 'avgust', sea: '25—27°C', air: '30—34°C', verdict: 'Najtoplije, ali i najgušće' },
+  { month: 'septembar', sea: '23—25°C', air: '25—29°C', verdict: 'Najlepši mjesec — toplo more, manje turista' },
+  { month: 'oktobar', sea: '20—22°C', air: '21—25°C', verdict: 'Mirno, prazne plaže, more još kupljivo' },
+];
+---
+
+<BaseLayout
+  title="Vrijeme u Petrovcu na Moru — vremenska prognoza za 7 dana"
+  description="Trenutna temperatura, prognoza za 7 dana i temperatura mora u Petrovcu na Moru. Plus mjesečni vodič kad je najbolji period za posjetu."
+>
+  <section class="vrijeme-hero">
+    <div class="container">
+      <nav class="breadcrumbs">
+        <a href={url('/')}>Početna</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Vrijeme</span>
+      </nav>
+      <span class="eyebrow">Vremenska prognoza</span>
+      <h1 class="vrijeme-title">
+        Vrijeme u Petrovcu na Moru —<br />
+        <em>uživo i za 7 dana</em>
+      </h1>
+      <p class="vrijeme-lead">
+        Trenutna temperatura vazduha i mora, kompletna sedmodnevna prognoza za Petrovac na Moru.
+        Podaci se osvježavaju svakih 10 minuta sa Open-Meteo servisa.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container vrijeme-content">
+      <div class="vrijeme-widget">
+        <WeatherWidget variant="full" />
+      </div>
+
+      <article class="vrijeme-prose">
+        <h2>Kad je najbolje vrijeme da posjetiš Petrovac na Moru?</h2>
+        <p>
+          Petrovac na Moru ima tipičnu mediteransku klimu — duga, suva ljeta i blage zime.
+          More se otvara za kupanje od kraja maja, a ostaje toplo sve do oktobra.
+          Najveća gužva je <strong>jul i avgust</strong>, ali ako tražiš mirniju varijantu sa
+          istim morem — <strong>septembar je najlepši mjesec</strong>.
+        </p>
+
+        {seaTemp !== undefined && (
+          <div class="sea-callout">
+            <span class="sea-callout__label">Temperatura mora trenutno</span>
+            <strong>{Math.round(seaTemp)}°C</strong>
+          </div>
+        )}
+
+        <h2>Mjesečni vodič — vrijeme i kupanje</h2>
+        <table class="months-table">
+          <thead>
+            <tr>
+              <th>Mjesec</th>
+              <th>More</th>
+              <th>Vazduh (dan)</th>
+              <th>Komentar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tideInfo.map((m) => (
+              <tr>
+                <td><strong>{m.month}</strong></td>
+                <td>{m.sea}</td>
+                <td>{m.air}</td>
+                <td>{m.verdict}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h2>Često postavljana pitanja</h2>
+
+        <h3>Da li je more toplo u maju?</h3>
+        <p>
+          Krajem maja, more je obično 19—21°C — hrabriji već ulaze, ali većina čeka jun.
+          Vazduh može biti i preko 25°C, tako da je vrijeme savršeno za šetnju i izlete.
+        </p>
+
+        <h3>Koliko često pada kiša ljeti?</h3>
+        <p>
+          Praktično nikako u julu i avgustu (1—2 kišna dana mjesečno, najčešće kratki pljuskovi).
+          U septembru se pojavi pokoja olujna večer ali dan ostaje sunčan.
+        </p>
+
+        <h3>Kako je vjetar?</h3>
+        <p>
+          Petrovac na Moru nije tako zatišen kao Budva — ovdje skoro stalno pirka, što
+          čini da se vrućine lakše podnose. Maestral (popodnevni morski vjetar) tipičan
+          je za rivijeru i donosi prijatno rashlađenje tokom najtoplijih dana.
+        </p>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .vrijeme-hero {
+    background: linear-gradient(135deg, var(--c-cream-warm) 0%, var(--c-bg) 100%);
+    padding: clamp(5rem, 12vw, 8rem) 0 clamp(3rem, 6vw, 4rem);
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-muted);
+    margin-bottom: var(--sp-6);
+  }
+  .breadcrumbs a { color: var(--c-muted); }
+  .breadcrumbs a:hover { color: var(--c-accent); }
+  .breadcrumbs span[aria-current] { color: var(--c-ink); font-weight: 600; }
+
+  .vrijeme-title {
+    margin: var(--sp-3) 0 var(--sp-4);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+  }
+  .vrijeme-title em {
+    font-style: italic;
+    color: var(--c-accent);
+  }
+  .vrijeme-lead {
+    max-width: 60ch;
+    color: var(--c-ink-soft);
+    line-height: 1.6;
+  }
+
+  .vrijeme-content {
+    display: grid;
+    gap: var(--sp-12);
+    grid-template-columns: 1fr;
+    max-width: 980px;
+  }
+  @media (min-width: 880px) {
+    .vrijeme-content {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-12);
+    }
+    .vrijeme-prose {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .vrijeme-widget {
+    align-self: start;
+  }
+
+  .vrijeme-prose h2 {
+    font-size: var(--fs-2xl);
+    font-weight: 400;
+    margin-block: var(--sp-10) var(--sp-4);
+  }
+  .vrijeme-prose h3 {
+    font-size: var(--fs-lg);
+    font-weight: 500;
+    margin-block: var(--sp-6) var(--sp-2);
+  }
+  .vrijeme-prose p {
+    color: var(--c-ink-soft);
+    line-height: 1.7;
+    margin-bottom: var(--sp-4);
+  }
+  .vrijeme-prose strong {
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+
+  .sea-callout {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--c-accent-soft);
+    border-radius: var(--r-lg);
+    margin-block: var(--sp-4);
+  }
+  .sea-callout__label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c-accent-deep);
+    font-weight: 600;
+  }
+  .sea-callout strong {
+    font-family: var(--ff-serif);
+    font-size: 2rem;
+    color: var(--c-accent-deep);
+    font-weight: 400;
+  }
+
+  .months-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-block: var(--sp-4);
+    font-size: var(--fs-sm);
+  }
+  .months-table th,
+  .months-table td {
+    padding: var(--sp-3);
+    text-align: left;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .months-table th {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c-muted);
+    font-weight: 600;
+  }
+  .months-table tbody tr:hover {
+    background: var(--c-cream-warm);
+  }
+</style>
