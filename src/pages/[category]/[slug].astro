@@ -51,6 +51,12 @@ const related = allInCategory
   .slice(0, 3);
 
 const data = listing.data;
+
+const contactPhone = data.contact.phone || owner?.data.phone || '';
+const contactWhatsapp = data.contact.whatsapp || owner?.data.whatsapp || '';
+const contactEmail = data.contact.email || owner?.data.email || '';
+const contactWebsite = data.contact.website || '';
+
 const ogImage = data.images[0] ?? '/og-default.jpg';
 const hasMap = data.location?.lat !== undefined && data.location?.lng !== undefined;
 const ytId = data.youtube_url ? youtubeId(data.youtube_url) : null;
@@ -86,9 +92,9 @@ const jsonLd = {
         longitude: data.location.lng,
       },
     }),
-  ...(data.contact.phone && { telephone: data.contact.phone }),
-  ...(data.contact.email && { email: data.contact.email }),
-  ...(data.contact.website && { url: data.contact.website }),
+  ...(contactPhone && { telephone: contactPhone }),
+  ...(contactEmail && { email: contactEmail }),
+  ...(contactWebsite && { url: contactWebsite }),
   ...(data.rating && {
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -371,10 +377,10 @@ const breadcrumbLd = {
         ) : (
           <ContactReveal
             listingId={listing.id}
-            phone={data.contact.phone}
-            whatsapp={data.contact.whatsapp}
-            email={data.contact.email}
-            website={data.contact.website}
+            phone={contactPhone}
+            whatsapp={contactWhatsapp}
+            email={contactEmail}
+            website={contactWebsite}
             priceFrom={data.price_from}
             priceUnit={data.price_unit}
           />

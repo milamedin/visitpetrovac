@@ -71,7 +71,7 @@ collections:
     summary: "{{name}}"
     fields:
       - { name: "name", label: "Ime", widget: "string" }
-      - { name: "email", label: "Email", widget: "string", required: false, pattern: ['^\S+@\S+\.\S+$', 'Mora biti email'] }
+      - { name: "email", label: "Email", widget: "string", required: false, pattern: ['^$|^\S+@\S+\.\S+$', 'Ostavi prazno ili unesi validan email'] }
       - { name: "phone", label: "Telefon", widget: "string", required: false }
       - { name: "whatsapp", label: "WhatsApp (sa kodom zemlje)", widget: "string", required: false }
       - { name: "photo", label: "Profilna fotografija", widget: "image", required: false, choose_url: false, media_folder: "/public/uploads/owners", public_folder: "/uploads/owners" }
@@ -134,8 +134,8 @@ collections:
           - { label: "Po obroku", value: "per_meal" }
           - { label: "Fiksno", value: "fixed" }
       - { name: "premium", label: "Premium pozicija (+150€/god)", widget: "boolean", default: false }
-      - { name: "booking_url", label: "Booking.com link (opciono — za prikaz \"Provjereno na Booking-u\" dugmeta)", widget: "string", required: false, pattern: ['^https?://.+', 'Mora biti validan URL'] }
-      - { name: "youtube_url", label: "YouTube link (opciono — embedovaće video na detail stranici)", widget: "string", required: false, pattern: ['^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Mora biti YouTube URL'] }
+      - { name: "booking_url", label: "Booking.com link (opciono — za prikaz \"Provjereno na Booking-u\" dugmeta)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL (mora pocinjati sa http:// ili https://)'] }
+      - { name: "youtube_url", label: "YouTube link (opciono — embedovaće video na detail stranici)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
       - name: "accommodation_type"
         label: "Tip smještaja (samo za kategoriju Smještaj)"
         widget: "select"
