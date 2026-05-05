@@ -5,6 +5,7 @@ import Gallery from '../../components/Gallery.astro';
 import ContactReveal from '../../components/ContactReveal.astro';
 import TourBookingForm from '../../components/TourBookingForm.astro';
 import ListingCard from '../../components/ListingCard.astro';
+import Picture from '../../components/Picture.astro';
 import { osmEmbedUrl, youtubeId } from '../../lib/utils';
 import { useI18n } from '../../i18n';
 import { applyTranslation, renderLocalizedBody } from '../../lib/i18n-content';
@@ -235,7 +236,7 @@ const breadcrumbLd = {
                 <div class:list={['unit', { 'unit--with-image': !!u.image }]}>
                   {u.image && (
                     <div class="unit__media">
-                      <img src={u.image} alt={u.name} loading="lazy" />
+                      <Picture src={u.image} alt={u.name} loading="lazy" />
                     </div>
                   )}
                   <div class="unit__body">
@@ -323,7 +324,7 @@ const breadcrumbLd = {
             <h2>{t('listing.section.host')}</h2>
             <div class="owner-card">
               {owner.data.photo ? (
-                <img src={owner.data.photo} alt={owner.data.name} class="owner-card__photo" loading="lazy" />
+                <Picture src={owner.data.photo} alt={owner.data.name} class="owner-card__photo" loading="lazy" />
               ) : (
                 <div class="owner-card__photo owner-card__photo--placeholder" aria-hidden="true">
                   {owner.data.name.charAt(0)}

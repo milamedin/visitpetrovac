@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Picture from '../../components/Picture.astro';
 import { useI18n, localeMeta } from '../../i18n';
 import { applyTranslation, renderLocalizedBody } from '../../lib/i18n-content';
 
@@ -91,7 +92,7 @@ const breadcrumbLd = {
     {post.data.cover_image && (
       <div class="container">
         <figure class="post__cover">
-          <img src={post.data.cover_image} alt="" loading="eager" fetchpriority="high" />
+          <Picture src={post.data.cover_image} alt="" loading="eager" fetchpriority="high" />
         </figure>
       </div>
     )}
@@ -118,7 +119,7 @@ const breadcrumbLd = {
           {all.map((p) => (
             <a href={url(`/blog/${p.id}`)} class="related__card">
               {p.data.cover_image && (
-                <img src={p.data.cover_image} alt="" loading="lazy" />
+                <Picture src={p.data.cover_image} alt="" loading="lazy" />
               )}
               <div class="related__body">
                 <span class="related__date">{fmt.format(p.data.published_at)}</span>

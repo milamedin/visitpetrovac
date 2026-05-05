@@ -1,5 +1,6 @@
 ---
 import SearchBar from './SearchBar.astro';
+import Picture from './Picture.astro';
 import { useI18n } from '../i18n';
 
 const { t } = useI18n(Astro);
@@ -18,7 +19,7 @@ const subtitle = t('hero.subtitle');
 
 <section class="hero">
   <div class="hero__media" aria-hidden="true">
-    <img src={image} alt="" loading="eager" fetchpriority="high" decoding="async" />
+    <Picture src={image} alt="" loading="eager" fetchpriority="high" decoding="async" />
     <div class="hero__overlay"></div>
   </div>
 

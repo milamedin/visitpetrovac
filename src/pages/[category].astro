@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ListingCard from '../components/ListingCard.astro';
 import CategoryPill from '../components/CategoryPill.astro';
 import FilterPanel from '../components/FilterPanel.astro';
+import Picture from '../components/Picture.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
 
@@ -191,7 +192,7 @@ const heroImage = category.data.hero_image ?? '/hero-petrovac.jpg';
   <!-- ───── Category hero ───── -->
   <section class="cat-hero">
     <div class="cat-hero__media" aria-hidden="true">
-      <img src={heroImage} alt="" loading="eager" fetchpriority="high" />
+      <Picture src={heroImage} alt="" loading="eager" fetchpriority="high" />
       <div class="cat-hero__overlay"></div>
     </div>
 

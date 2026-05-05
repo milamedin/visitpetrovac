@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ListingCard from '../components/ListingCard.astro';
 import CategoryPill from '../components/CategoryPill.astro';
+import Picture from '../components/Picture.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
 
@@ -41,7 +42,7 @@ const categoryMap = new Map(allCategories.map((c) => [c.id, c.data.name]));
 >
   <section class="cat-hero">
     <div class="cat-hero__media" aria-hidden="true">
-      <img src="/hero-petrovac.jpg" alt="" loading="eager" fetchpriority="high" />
+      <Picture src="/hero-petrovac.jpg" alt="" loading="eager" fetchpriority="high" />
       <div class="cat-hero__overlay"></div>
     </div>
 

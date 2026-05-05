@@ -1,4 +1,6 @@
 ---
+import Picture from './Picture.astro';
+
 interface Props {
   images: string[];
   title: string;
@@ -25,7 +27,7 @@ const remaining = Math.max(0, images.length - 5);
           data-index="0"
           aria-label={`${title} — fotografija 1, klikni za uvećanje`}
         >
-          <img src={main} alt={`${title} — glavna fotografija`} loading="eager" fetchpriority="high" />
+          <Picture src={main} alt={`${title} — glavna fotografija`} loading="eager" fetchpriority="high" />
           <span class="gallery__zoom" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="7" />
@@ -44,7 +46,7 @@ const remaining = Math.max(0, images.length - 5);
                 data-index={i + 1}
                 aria-label={`${title} — fotografija ${i + 2}, klikni za uvećanje`}
               >
-                <img src={src} alt={`${title} — fotografija ${i + 2}`} loading="lazy" />
+                <Picture src={src} alt={`${title} — fotografija ${i + 2}`} loading="lazy" />
                 {i === rest.length - 1 && remaining > 0 && (
                   <span class="gallery__more">+{remaining}</span>
                 )}

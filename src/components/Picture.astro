@@ -1,0 +1,73 @@
+---
+/**
+ * <Picture> — servira WebP varijantu kad postoji uz JPG/PNG, fallback na original.
+ *
+ * Pretpostavka: WebP fajl postoji uz JPG/PNG sa istim imenom (npr. foo.jpg + foo.webp).
+ * Build skripta `scripts/optimize-images.mjs` automatski generise WebP iz svake nove
+ * slike u public/uploads/ tako da Sveltia uploads odmah dobiju WebP varijantu.
+ *
+ * Primjer:
+ *   <Picture src="/uploads/listings/demo.jpg" alt="Apartman" loading="lazy" />
+ */
+
+interface Props {
+  src: string;
+  alt: string;
+  width?: number | string;
+  height?: number | string;
+  loading?: 'lazy' | 'eager';
+  decoding?: 'async' | 'sync' | 'auto';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  sizes?: string;
+  class?: string;
+  style?: string;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  loading = 'lazy',
+  decoding = 'async',
+  fetchpriority,
+  sizes,
+  class: className,
+  style,
+} = Astro.props;
+
+// Generate webp path by swapping extension
+const webpSrc = src.replace(/\.(jpe?g|png)$/i, '.webp');
+const hasWebp = webpSrc !== src;
+---
+
+{hasWebp ? (
+  <picture>
+    <source type="image/webp" srcset={webpSrc} />
+    <img
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding={decoding}
+      fetchpriority={fetchpriority}
+      sizes={sizes}
+      class={className}
+      style={style}
+    />
+  </picture>
+) : (
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={loading}
+    decoding={decoding}
+    fetchpriority={fetchpriority}
+    sizes={sizes}
+    class={className}
+    style={style}
+  />
+)}
