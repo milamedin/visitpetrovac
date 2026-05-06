@@ -115,7 +115,7 @@ const unitLabel: Record<string, string> = {
     box-shadow: var(--sh-lg);
     border-color: transparent;
   }
-  .lcard:hover .lcard__media img {
+  .lcard:hover .lcard__media :global(img) {
     transform: scale(1.06);
   }
 
@@ -130,7 +130,7 @@ const unitLabel: Record<string, string> = {
     background: var(--c-cream-warm);
   }
 
-  .lcard__media img {
+  .lcard__media :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;

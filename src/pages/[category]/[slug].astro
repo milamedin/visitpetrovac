@@ -568,13 +568,13 @@ const breadcrumbLd = {
     overflow: hidden;
     background: var(--c-border);
   }
-  .unit__media img {
+  .unit__media :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform var(--dur-slow) var(--ease);
   }
-  .unit:hover .unit__media img {
+  .unit:hover .unit__media :global(img) {
     transform: scale(1.04);
   }
   .unit__body {
@@ -755,7 +755,7 @@ const breadcrumbLd = {
     border-radius: var(--r-xl);
     align-items: flex-start;
   }
-  .owner-card__photo {
+  :global(.owner-card__photo) {
     width: 72px;
     height: 72px;
     border-radius: 50%;

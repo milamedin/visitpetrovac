@@ -42,7 +42,7 @@ const hasWebp = webpSrc !== src;
 ---
 
 {hasWebp ? (
-  <picture>
+  <picture class="picture-wrap">
     <source type="image/webp" srcset={webpSrc} />
     <img
       src={src}
@@ -71,3 +71,15 @@ const hasWebp = webpSrc !== src;
     style={style}
   />
 )}
+
+<style is:global>
+  /*
+   * <picture> wrapper inherits parent layout — display:contents makes the picture
+   * element itself "invisible" for layout purposes, so the inner <img> behaves
+   * exactly like it would without the wrapper. This preserves all existing CSS
+   * targeting `.parent img` selectors (object-fit, height: 100%, etc.).
+   */
+  picture.picture-wrap {
+    display: contents;
+  }
+</style>

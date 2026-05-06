@@ -116,7 +116,7 @@ const categoryMap = new Map(allCategories.map((c) => [c.id, c.data.name]));
     inset: 0;
     z-index: -1;
   }
-  .cat-hero__media img {
+  .cat-hero__media :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;

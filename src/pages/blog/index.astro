@@ -118,7 +118,7 @@ const fmt = new Intl.DateTimeFormat(localeMeta[locale].htmlLang, {
     transform: translateY(-4px);
     box-shadow: var(--sh-lg);
   }
-  .post-card:hover .post-card__media img {
+  .post-card:hover .post-card__media :global(img) {
     transform: scale(1.05);
   }
   .post-card__link {
@@ -133,7 +133,7 @@ const fmt = new Intl.DateTimeFormat(localeMeta[locale].htmlLang, {
     overflow: hidden;
     background: var(--c-cream-warm);
   }
-  .post-card__media img {
+  .post-card__media :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
