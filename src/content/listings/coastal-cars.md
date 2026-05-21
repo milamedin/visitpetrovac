@@ -20,7 +20,7 @@ contact:
   phone: +382 67 012 345
   whatsapp: '+38267012345'
   email: coastal@example.com
-  website: 'https://example.com/coastal'
+  website: ''
 location:
   address: Petrovac (dostava na adresu)
 rating: 4.9

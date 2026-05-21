@@ -59,7 +59,7 @@ contact:
   phone: '+382 33 461 100'
   whatsapp: '+38267789012'
   email: info@hotelpetrovac.example
-  website: 'https://example.com/hotel-petrovac'
+  website: ''
 location:
   lat: 42.2056
   lng: 18.9445

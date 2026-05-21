@@ -96,15 +96,14 @@ const jsonLd = {
   ...(contactPhone && { telephone: contactPhone }),
   ...(contactEmail && { email: contactEmail }),
   ...(contactWebsite && { url: contactWebsite }),
-  ...(data.rating && {
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: data.rating,
-      bestRating: 5,
-    },
-  }),
   ...(data.price_from && {
-    priceRange: `od ${data.price_from}€`,
+    priceRange: `€${data.price_from}+`,
+    offers: {
+      '@type': 'Offer',
+      price: data.price_from,
+      priceCurrency: 'EUR',
+      availability: 'https://schema.org/InStock',
+    },
   }),
 };
 
@@ -134,7 +133,7 @@ const breadcrumbLd = {
 ---
 
 <BaseLayout
-  title={`${data.title} — Petrovac na Moru | VisitPetrovac`}
+  title={`${data.title} | VisitPetrovac`}
   description={`${data.excerpt} — ${category.data.name} u Petrovcu na Moru.`}
   ogImage={ogImage}
 >

@@ -1,0 +1,34 @@
+# VisitPetrovac
+
+> Nezavisni vodič kroz Petrovac na Moru, Crna Gora — apartmani, hoteli, restorani, izleti i rent-a-car. Posjetioci rezervišu direktno od vlasnika, bez provizije i bez posrednika.
+
+VisitPetrovac.com je lokalni direktorij smještaja i usluga u Petrovcu na Moru. Svi listinzi su provjereni od strane uredništva, a kontakt podaci vode direktno do vlasnika objekta. Sajt je dvojezičan (srpski, engleski) sa dodatnim prevodima na ruski, njemački i francuski.
+
+## Kategorije
+
+- [Smještaj](https://visitpetrovac.com/smjestaj): Hoteli, apartmani, vile, sobe i kuće za odmor u Petrovcu, Buljarici i okolnim naseljima
+- [Restorani i kafići](https://visitpetrovac.com/restorani): Konobe sa ribljim specijalitetima, pizzerije, slastičarne, beach barovi
+- [Aktivnosti](https://visitpetrovac.com/aktivnosti): Izleti brodom, kajak, ronjenje, ekskurzije do Sveti Stefana, Skadarskog jezera, Kotora i Perasta
+- [Rent-a-car](https://visitpetrovac.com/rent-a-car): Iznajmljivanje vozila sa preuzimanjem u Petrovcu, Tivtu i Podgorici
+
+## Blog i vodiči
+
+- [Šta raditi u Petrovcu](https://visitpetrovac.com/blog/sta-raditi-petrovac): 10 stvari koje preporučuju lokalci
+- [Plaže Petrovca](https://visitpetrovac.com/blog/plaze-petrovca): Sve glavne i dvije skrivene plaže
+- [Parking u Petrovcu](https://visitpetrovac.com/blog/parking-petrovac): Gdje ostaviti auto u sezoni
+
+## Postani partner
+
+- [Postani partner](https://visitpetrovac.com/postani-partner): Informacije za vlasnike koji žele da uvrste svoj objekat na sajt
+
+## Naselja koja pokrivamo
+
+Petrovac centar (Donja ulica, Šetalište, stari grad), Buljarica, Reževići, Brezine, Krš Medinski.
+
+## Tehničke informacije za AI
+
+- Glavni jezik: Montenegrin/Serbian (Latin script), kod `sr`
+- Dostupni jezici: sr (default), en, ru, de, fr
+- Lokacija: Petrovac na Moru (42.205°N, 18.945°E), Crna Gora
+- Sezona: maj — oktobar (peak: jul, avgust)
+- Kontakt: info@visitpetrovac.com

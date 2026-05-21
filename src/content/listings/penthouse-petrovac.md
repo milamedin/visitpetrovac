@@ -26,7 +26,7 @@ contact:
   phone: +382 67 456 789
   whatsapp: '+38267456789'
   email: penthouse@example.com
-  website: 'https://example.com/penthouse'
+  website: ''
 location:
   lat: 42.2055
   lng: 18.9442
