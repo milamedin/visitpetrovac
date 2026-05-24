@@ -1,6 +1,6 @@
 ---
 title: Cjelodnevni izlet — Skadarsko jezero
-category: aktivnosti
+category: iskustva
 owner: dragan-radulovic
 excerpt: >-
   Cjelodnevni tour autobusem do Skadarskog jezera. Vožnja brodom, ručak, posjeta

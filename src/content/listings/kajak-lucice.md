@@ -1,6 +1,6 @@
 ---
 title: Kajak izlet do Lučica plaže
-category: aktivnosti
+category: iskustva
 owner: dragan-radulovic
 excerpt: >-
   Poludnevni vodeni kajak izlet od Petrovca do skrivene Lučice plaže. Trajanje

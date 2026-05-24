@@ -1,6 +1,6 @@
 ---
 title: Izlet brodom — Sveti Stefan i Miločer
-category: aktivnosti
+category: iskustva
 excerpt: >-
   Poludnevni izlet brodom — Sveti Stefan, plaža Miločer, kupanje, pauza za
   ručak. Polazak iz Petrovca.

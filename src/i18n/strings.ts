@@ -10,6 +10,7 @@ export type StringKey =
   | 'nav.restaurants'
   | 'nav.tours'
   | 'nav.rentacar'
+  | 'nav.shops'
   | 'nav.guide'
   | 'nav.becomePartner'
   | 'nav.openMenu'
@@ -150,6 +151,7 @@ const sr: StringMap = {
   'nav.restaurants': 'Restorani i kafići',
   'nav.tours': 'Iskustva',
   'nav.rentacar': 'Rent-a-car',
+  'nav.shops': 'Trgovina',
   'nav.guide': 'Vodič',
   'nav.becomePartner': 'Postani partner',
   'nav.openMenu': 'Otvori meni',
@@ -289,6 +291,7 @@ const en: Partial<StringMap> = {
   'nav.restaurants': 'Restaurants & Cafés',
   'nav.tours': 'Experiences',
   'nav.rentacar': 'Rent-a-car',
+  'nav.shops': 'Shops',
   'nav.guide': 'Guide',
   'nav.becomePartner': 'Become a partner',
   'nav.openMenu': 'Open menu',
@@ -428,6 +431,7 @@ const ru: Partial<StringMap> = {
   'nav.restaurants': 'Рестораны и кафе',
   'nav.tours': 'Впечатления',
   'nav.rentacar': 'Аренда авто',
+  'nav.shops': 'Магазины',
   'nav.guide': 'Гид',
   'nav.becomePartner': 'Стать партнёром',
   'nav.openMenu': 'Открыть меню',
@@ -567,6 +571,7 @@ const de: Partial<StringMap> = {
   'nav.restaurants': 'Restaurants & Cafés',
   'nav.tours': 'Erlebnisse',
   'nav.rentacar': 'Mietwagen',
+  'nav.shops': 'Geschäfte',
   'nav.guide': 'Reiseführer',
   'nav.becomePartner': 'Partner werden',
   'nav.openMenu': 'Menü öffnen',
@@ -706,6 +711,7 @@ const fr: Partial<StringMap> = {
   'nav.restaurants': 'Restaurants & cafés',
   'nav.tours': 'Expériences',
   'nav.rentacar': 'Location de voiture',
+  'nav.shops': 'Commerces',
   'nav.guide': 'Guide',
   'nav.becomePartner': 'Devenir partenaire',
   'nav.openMenu': 'Ouvrir le menu',

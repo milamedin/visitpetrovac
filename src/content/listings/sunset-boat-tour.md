@@ -1,6 +1,6 @@
 ---
 title: Sunset boat tour — vožnja brodom uz zalazak
-category: aktivnosti
+category: iskustva
 owner: dragan-radulovic
 excerpt: >-
   Dvosatna vožnja brodom uz crnogorsku obalu, povratak za zalazak. Šampanjac

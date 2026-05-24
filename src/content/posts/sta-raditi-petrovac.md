@@ -8,7 +8,7 @@ published_at: 2026-04-28T00:00:00.000Z
 author: VisitPetrovac
 tags:
   - vodic
-  - aktivnosti
+  - iskustva
   - izleti
 translations:
   en:

@@ -137,9 +137,10 @@ collections:
       - { name: "booking_url", label: "Booking.com link (opciono — za prikaz \"Provjereno na Booking-u\" dugmeta)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL (mora pocinjati sa http:// ili https://)'] }
       - { name: "youtube_url", label: "YouTube link (opciono — embedovaće video na detail stranici)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
       - name: "accommodation_type"
-        label: "Tip smještaja (samo za kategoriju Smještaj)"
+        label: "Tip smještaja"
         widget: "select"
         required: false
+        condition: { field: "category", value: "smjestaj" }
         options:
           - { label: "Hotel", value: "hotel" }
           - { label: "Vila", value: "vila" }
@@ -147,9 +148,10 @@ collections:
           - { label: "Apartman", value: "apartman" }
           - { label: "Soba", value: "soba" }
       - name: "restaurant_type"
-        label: "Tip restorana (samo za kategoriju Restorani i kafići)"
+        label: "Tip restorana"
         widget: "select"
         required: false
+        condition: { field: "category", value: "restorani" }
         options:
           - { label: "Restoran", value: "restoran" }
           - { label: "Konoba", value: "konoba" }
@@ -158,9 +160,10 @@ collections:
           - { label: "Bar / Kafić", value: "bar" }
           - { label: "Beach bar", value: "beach-bar" }
       - name: "activity_type"
-        label: "Tip iskustva (samo za kategoriju Iskustva)"
+        label: "Tip iskustva"
         widget: "select"
         required: false
+        condition: { field: "category", value: "iskustva" }
         options:
           - { label: "Izlet brodom", value: "brod" }
           - { label: "Kajak / SUP", value: "kajak-sup" }
@@ -170,6 +173,19 @@ collections:
           - { label: "Kultura / istorija", value: "kultura" }
           - { label: "Gastro / kuvanje", value: "gastro" }
           - { label: "Fotoshooting", value: "foto" }
+      - name: "shop_type"
+        label: "Tip trgovine"
+        widget: "select"
+        required: false
+        condition: { field: "category", value: "trgovina" }
+        options:
+          - { label: "Prodavnica", value: "prodavnica" }
+          - { label: "Market / supermarket", value: "market" }
+          - { label: "Apoteka", value: "apoteka" }
+          - { label: "Pijaca", value: "pijaca" }
+          - { label: "Butik / odjeća", value: "butik" }
+          - { label: "Suveniri", value: "suveniri" }
+          - { label: "Ostalo", value: "ostalo" }
       - name: "neighborhood"
         label: "Naselje (gdje se objekat nalazi)"
         widget: "relation"
@@ -179,13 +195,15 @@ collections:
         display_fields: ["name"]
         required: false
       - name: "menu_url"
-        label: "Meni / jelovnik (PDF ili slika — za restorane)"
+        label: "Meni / jelovnik (PDF ili slika)"
         widget: "file"
         required: false
+        condition: { field: "category", value: "restorani" }
         media_folder: "/public/uploads/menus"
         public_folder: "/uploads/menus"
       - name: "units"
         label: "Smještajne jedinice (za kuće sa više apartmana ili hotele — ostavi prazno za samostalni objekat)"
+        condition: { field: "category", value: "smjestaj" }
         widget: "list"
         required: false
         summary: "{{fields.name}} — {{fields.capacity}} osoba — od {{fields.price_from}}€"

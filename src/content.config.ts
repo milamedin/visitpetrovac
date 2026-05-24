@@ -110,6 +110,9 @@ const listings = defineCollection({
     activity_type: z
       .enum(['brod', 'kajak-sup', 'ronjenje', 'hiking', 'ribolov', 'kultura', 'gastro', 'foto'])
       .optional(),
+    shop_type: z
+      .enum(['apoteka', 'prodavnica', 'pijaca', 'market', 'butik', 'suveniri', 'ostalo'])
+      .optional(),
     neighborhood: reference('neighborhoods').optional(),
     menu_url: z.string().optional(),
     units: z

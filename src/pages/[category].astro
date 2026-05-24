@@ -91,7 +91,7 @@ const FILTER_CONFIG: Record<string, FilterCfg> = {
     withNeighborhoods: true,
     priceLabel: 'Cijena obroka (€)',
   },
-  aktivnosti: {
+  iskustva: {
     typeLabel: 'Tip iskustva',
     typeField: 'activity_type',
     typeOptions: [
@@ -116,6 +116,28 @@ const FILTER_CONFIG: Record<string, FilterCfg> = {
     ],
     withNeighborhoods: false,
     priceLabel: 'Cijena (€)',
+  },
+  trgovina: {
+    typeLabel: 'Tip',
+    typeField: 'shop_type',
+    typeOptions: [
+      { value: 'prodavnica', label: 'Prodavnica' },
+      { value: 'market', label: 'Market / supermarket' },
+      { value: 'apoteka', label: 'Apoteka' },
+      { value: 'pijaca', label: 'Pijaca' },
+      { value: 'butik', label: 'Butik / odjeća' },
+      { value: 'suveniri', label: 'Suveniri' },
+      { value: 'ostalo', label: 'Ostalo' },
+    ],
+    amenities: [
+      { value: 'radi nedjelja', label: 'Radi nedjeljom' },
+      { value: 'non-stop', label: '0—24h' },
+      { value: 'kartice', label: 'Plaćanje karticom' },
+      { value: 'dostava', label: 'Dostava' },
+      { value: 'organsko', label: 'Organska / domaća roba' },
+    ],
+    withNeighborhoods: true,
+    priceLabel: '',
   },
 };
 
