@@ -199,7 +199,7 @@ async function translateFile(
 
   const resp = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 8000,
+    max_tokens: 16000,
     messages: [{ role: 'user', content: prompt }],
   });
 
@@ -287,7 +287,12 @@ async function main() {
   }
 
   console.log(`\nDone. translated: ${translated} | up-to-date: ${skipped} | failed: ${failed}`);
-  if (failed > 0) process.exit(1);
+  // Do not fail the build on translate errors — keep deploy moving with
+  // whatever was translated successfully. Failed files retain old/missing
+  // translations and will retry on the next run.
+  if (failed > 0) {
+    console.warn(`⚠  ${failed} file(s) failed translation but build continues.`);
+  }
 }
 
 main().catch((err) => {
