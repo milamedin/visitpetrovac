@@ -1,5 +1,5 @@
 ---
-name: Aktivnosti
+name: Iskustva
 description: >-
   Izleti brodom, kajakom, ronjenje, hiking, pecanje sa lokalcima, kuvanje,
   fotoshooting, SUP daske i druge aktivnosti u Petrovcu na Moru i okolini.
@@ -7,22 +7,22 @@ icon: ⛵
 order: 3
 translations:
   en:
-    name: Activities
+    name: Experiences
     description: >-
       Boat trips, kayaking, diving, hiking, fishing with locals, cooking
       classes, photoshoots, SUP and other activities in Petrovac na Moru.
   ru:
-    name: Активности
+    name: Впечатления
     description: >-
       Морские прогулки, каякинг, дайвинг, хайкинг, рыбалка с местными, кулинария,
       фотосессии, SUP и другие активности в Петроваце-на-Мору.
   de:
-    name: Aktivitäten
+    name: Erlebnisse
     description: >-
       Bootsfahrten, Kajakfahrten, Tauchen, Wandern, Angeln mit Einheimischen,
       Kochkurse, Fotoshootings, SUP und weitere Aktivitäten in Petrovac na Moru.
   fr:
-    name: Activités
+    name: Expériences
     description: >-
       Excursions en bateau, kayak, plongée, randonnée, pêche avec les locaux,
       cours de cuisine, séances photo, SUP et autres activités à Petrovac na

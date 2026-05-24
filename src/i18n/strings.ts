@@ -148,7 +148,7 @@ type StringMap = Record<StringKey, string>;
 const sr: StringMap = {
   'nav.apartments': 'Smještaj',
   'nav.restaurants': 'Restorani i kafići',
-  'nav.tours': 'Aktivnosti',
+  'nav.tours': 'Iskustva',
   'nav.rentacar': 'Rent-a-car',
   'nav.guide': 'Vodič',
   'nav.becomePartner': 'Postani partner',
@@ -159,7 +159,7 @@ const sr: StringMap = {
   'hero.eyebrow': 'Petrovac na Moru, Crna Gora',
   'hero.title.line1': 'Otkrij Petrovac na Moru',
   'hero.title.line2': 'kakav samo lokalci znaju',
-  'hero.subtitle': 'Smještaj, restorani, aktivnosti i rent-a-car u Petrovcu na Moru. Direktan kontakt sa vlasnicima — bez provizije, bez posrednika.',
+  'hero.subtitle': 'Smještaj, restorani, iskustva i rent-a-car u Petrovcu na Moru. Direktan kontakt sa vlasnicima — bez provizije, bez posrednika.',
   'hero.search.placeholder': 'Šta tražiš u Petrovcu?',
   'hero.scroll': 'Istraži',
   'hero.stat.objects': 'provjerenih objekata',
@@ -287,7 +287,7 @@ const sr: StringMap = {
 const en: Partial<StringMap> = {
   'nav.apartments': 'Accommodation',
   'nav.restaurants': 'Restaurants & Cafés',
-  'nav.tours': 'Activities',
+  'nav.tours': 'Experiences',
   'nav.rentacar': 'Rent-a-car',
   'nav.guide': 'Guide',
   'nav.becomePartner': 'Become a partner',
@@ -426,7 +426,7 @@ const en: Partial<StringMap> = {
 const ru: Partial<StringMap> = {
   'nav.apartments': 'Размещение',
   'nav.restaurants': 'Рестораны и кафе',
-  'nav.tours': 'Активности',
+  'nav.tours': 'Впечатления',
   'nav.rentacar': 'Аренда авто',
   'nav.guide': 'Гид',
   'nav.becomePartner': 'Стать партнёром',
@@ -565,7 +565,7 @@ const ru: Partial<StringMap> = {
 const de: Partial<StringMap> = {
   'nav.apartments': 'Unterkunft',
   'nav.restaurants': 'Restaurants & Cafés',
-  'nav.tours': 'Aktivitäten',
+  'nav.tours': 'Erlebnisse',
   'nav.rentacar': 'Mietwagen',
   'nav.guide': 'Reiseführer',
   'nav.becomePartner': 'Partner werden',
@@ -704,7 +704,7 @@ const de: Partial<StringMap> = {
 const fr: Partial<StringMap> = {
   'nav.apartments': 'Hébergement',
   'nav.restaurants': 'Restaurants & cafés',
-  'nav.tours': 'Activités',
+  'nav.tours': 'Expériences',
   'nav.rentacar': 'Location de voiture',
   'nav.guide': 'Guide',
   'nav.becomePartner': 'Devenir partenaire',

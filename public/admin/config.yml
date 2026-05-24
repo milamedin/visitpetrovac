@@ -158,7 +158,7 @@ collections:
           - { label: "Bar / Kafić", value: "bar" }
           - { label: "Beach bar", value: "beach-bar" }
       - name: "activity_type"
-        label: "Tip aktivnosti (samo za kategoriju Aktivnosti)"
+        label: "Tip iskustva (samo za kategoriju Iskustva)"
         widget: "select"
         required: false
         options:
