@@ -44,10 +44,11 @@ export const GET: APIRoute = async () => {
     urls.push({ path: `/${cat.id}`, changefreq: 'weekly', priority: 0.8, lastmod: today });
   }
 
-  const listings = await getCollection('listings', ({ data }) => data.published !== false);
+  const { getAllListings } = await import('../lib/listings');
+  const listings = await getAllListings();
   for (const listing of listings) {
     urls.push({
-      path: `/${listing.data.category.id}/${listing.id}`,
+      path: `/${listing.categorySlug}/${listing.id}`,
       changefreq: 'monthly',
       priority: 0.7,
       lastmod: today,

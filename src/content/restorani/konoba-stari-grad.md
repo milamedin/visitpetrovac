@@ -1,6 +1,5 @@
 ---
 title: Konoba Stari Grad
-category: restorani
 excerpt: >-
   Tradicionalna crnogorska kuhinja, riblji specijaliteti, domaće vino. Letnja
   bašta sa pogledom na more.
@@ -16,9 +15,6 @@ images:
   - /uploads/listings/demo-castle.jpg
 capacity: 60
 restaurant_type: konoba
-contact:
-  phone: +382 33 461 555
-  email: konoba@example.com
 location:
   lat: 42.2061
   lng: 18.9447

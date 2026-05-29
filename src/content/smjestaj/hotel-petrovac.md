@@ -1,10 +1,10 @@
 ---
 title: Hotel Petrovac — porodični hotel u centru
-category: smjestaj
 excerpt: Klasičan porodični hotel sa 28 soba, otvoren od 1972. Restoran, bazen, bar, 100m od plaže.
 price_from: 60
 price_unit: per_night
 premium: true
+created_at: 2026-05-24
 amenities:
   - WiFi
   - Klima
@@ -55,11 +55,6 @@ units:
 accommodation_type: hotel
 neighborhood: donja-ulica
 
-contact:
-  phone: '+382 33 461 100'
-  whatsapp: '+38267789012'
-  email: info@hotelpetrovac.example
-  website: ''
 location:
   lat: 42.2056
   lng: 18.9445

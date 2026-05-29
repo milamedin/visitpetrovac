@@ -7,6 +7,7 @@ import FilterPanel from '../components/FilterPanel.astro';
 import Picture from '../components/Picture.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
+import { getListingsByCategory, collectionFor } from '../lib/listings';
 
 export const prerender = false;
 
@@ -14,7 +15,7 @@ const { t, url, locale } = useI18n(Astro);
 
 const { category: slug } = Astro.params;
 
-if (!slug) return Astro.redirect(url('/404'));
+if (!slug || !collectionFor(slug)) return Astro.redirect(url('/404'));
 
 const categoryRaw = await getEntry('categories', slug);
 if (!categoryRaw) return Astro.redirect(url('/404'));
@@ -24,15 +25,14 @@ const allCategories = (await getCollection('categories'))
   .map((c) => applyTranslation(c, locale))
   .sort((a, b) => a.data.order - b.data.order);
 
-const allListings = (await getCollection(
-  'listings',
-  ({ data }) => data.published !== false && data.category.id === slug,
-)).map((l) => applyTranslation(l, locale));
+const allListings = (await getListingsByCategory(slug)).map((l) =>
+  Object.assign(applyTranslation(l, locale), { categorySlug: l.categorySlug }),
+);
 
 // ─── Filters config per category ──────────────────────────────────
 type FilterCfg = {
   typeLabel: string;
-  typeField: 'accommodation_type' | 'restaurant_type' | 'activity_type';
+  typeField: 'accommodation_type' | 'restaurant_type' | 'activity_type' | 'shop_type';
   typeOptions: { value: string; label: string }[];
   amenities: { value: string; label: string }[];
   withNeighborhoods: boolean;
@@ -161,7 +161,7 @@ const activeFilterCount =
 const filteredListings = filterCfg
   ? allListings.filter((l) => {
       if (selectedTypes.length > 0) {
-        const t = l.data[filterCfg.typeField];
+        const t = (l.data as any)[filterCfg.typeField];
         if (!t || !selectedTypes.includes(t)) return false;
       }
       if (filterCfg.withNeighborhoods && selectedNeighborhoods.length > 0) {
@@ -189,13 +189,20 @@ const neighborhoodOptions = filterCfg?.withNeighborhoods
   : [];
 
 const sortParam = params.get('sort') ?? 'premium';
-const sortedListings = [...filteredListings].sort((a, b) => {
-  if (sortParam === 'price-asc') return (a.data.price_from ?? Infinity) - (b.data.price_from ?? Infinity);
-  if (sortParam === 'price-desc') return (b.data.price_from ?? 0) - (a.data.price_from ?? 0);
-  if (sortParam === 'rating') return (b.data.rating ?? 0) - (a.data.rating ?? 0);
-  const score = (l: typeof a) => (l.data.premium ? 1 : 0);
-  return score(b) - score(a);
-});
+const sortedListings = (() => {
+  if (sortParam === 'price-asc') return [...filteredListings].sort((a, b) => (a.data.price_from ?? Infinity) - (b.data.price_from ?? Infinity));
+  if (sortParam === 'price-desc') return [...filteredListings].sort((a, b) => (b.data.price_from ?? 0) - (a.data.price_from ?? 0));
+  if (sortParam === 'rating') return [...filteredListings].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0));
+  // Default: Premium first, then newest (by created_at desc)
+  return [...filteredListings].sort((a, b) => {
+    const ap = a.data.premium ? 1 : 0;
+    const bp = b.data.premium ? 1 : 0;
+    if (ap !== bp) return bp - ap;
+    const at = a.data.created_at ? new Date(a.data.created_at).getTime() : 0;
+    const bt = b.data.created_at ? new Date(b.data.created_at).getTime() : 0;
+    return bt - at;
+  });
+})();
 
 const sortOptions = [
   { value: 'premium', label: t('cat.sort.recommended') },
@@ -302,7 +309,7 @@ const heroImage = category.data.hero_image ?? '/hero-petrovac.jpg';
           <div class="listings-grid">
             {sortedListings.map((listing) => (
               <ListingCard
-                href={url(`/${listing.data.category.id}/${listing.id}`)}
+                href={url(`/${listing.categorySlug}/${listing.id}`)}
                 title={listing.data.title}
                 excerpt={listing.data.excerpt}
                 image={listing.data.images[0]}

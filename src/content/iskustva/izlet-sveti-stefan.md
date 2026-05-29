@@ -1,12 +1,12 @@
 ---
 title: Izlet brodom — Sveti Stefan i Miločer
-category: iskustva
 excerpt: >-
   Poludnevni izlet brodom — Sveti Stefan, plaža Miločer, kupanje, pauza za
   ručak. Polazak iz Petrovca.
 price_from: 25
 price_unit: per_person
 premium: true
+created_at: 2026-05-24
 amenities:
   - Profesionalni vodič
   - Voda i osvježenje
@@ -17,10 +17,6 @@ images:
   - /uploads/listings/demo-castle.jpg
 capacity: 12
 activity_type: brod
-contact:
-  phone: +382 67 345 678
-  whatsapp: '+38267345678'
-  email: izleti@example.com
 location:
   lat: 42.2058
   lng: 18.9444

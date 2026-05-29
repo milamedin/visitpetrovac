@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Gallery from '../../components/Gallery.astro';
 import ContactReveal from '../../components/ContactReveal.astro';
@@ -9,6 +9,7 @@ import Picture from '../../components/Picture.astro';
 import { osmEmbedUrl, youtubeId } from '../../lib/utils';
 import { useI18n } from '../../i18n';
 import { applyTranslation, renderLocalizedBody } from '../../lib/i18n-content';
+import { getListing, getListingsByCategory, sortPremiumThenNewest, collectionFor } from '../../lib/listings';
 
 export const prerender = false;
 
@@ -16,18 +17,14 @@ const { t, url, locale } = useI18n(Astro);
 
 const { category: categorySlug, slug } = Astro.params;
 
-if (!categorySlug || !slug) return Astro.redirect(url('/404'));
+if (!categorySlug || !slug || !collectionFor(categorySlug)) return Astro.redirect(url('/404'));
 
 const categoryRaw = await getEntry('categories', categorySlug);
 if (!categoryRaw) return Astro.redirect(url('/404'));
 const category = applyTranslation(categoryRaw, locale);
 
-const listingRaw = await getEntry('listings', slug);
-if (!listingRaw || listingRaw.data.category.id !== categorySlug) {
-  return Astro.redirect(url('/404'));
-}
-
-if (listingRaw.data.published === false) {
+const listingRaw = await getListing(categorySlug, slug);
+if (!listingRaw || listingRaw.data.published === false) {
   return Astro.redirect(url('/404'));
 }
 
@@ -39,24 +36,19 @@ const ownerRaw = listingRaw.data.owner ? await getEntry(listingRaw.data.owner) :
 const owner = ownerRaw ? applyTranslation(ownerRaw, locale) : null;
 
 // Related listings: same category, exclude current, max 3
-const allInCategory = await getCollection(
-  'listings',
-  ({ data, id }) => data.published !== false && data.category.id === categorySlug && id !== slug,
-);
-const related = allInCategory
-  .map((r) => applyTranslation(r, locale))
-  .sort((a, b) => {
-    const score = (l: typeof a) => (l.data.premium ? 1 : 0);
-    return score(b) - score(a);
-  })
-  .slice(0, 3);
+const allInCategory = (await getListingsByCategory(categorySlug)).filter((r) => r.id !== slug);
+const related = sortPremiumThenNewest(allInCategory as any)
+  .slice(0, 3)
+  .map((r: any) => Object.assign(applyTranslation(r, locale), { categorySlug: r.categorySlug }));
 
 const data = listing.data;
 
-const contactPhone = data.contact.phone || owner?.data.phone || '';
-const contactWhatsapp = data.contact.whatsapp || owner?.data.whatsapp || '';
-const contactEmail = data.contact.email || owner?.data.email || '';
-const contactWebsite = data.contact.website || '';
+// Contact ALWAYS comes from owner. Per-listing `website` is a free-standing
+// optional field on the listing (e.g., hotel booking page distinct from owner).
+const contactPhone = owner?.data.phone || '';
+const contactWhatsapp = owner?.data.whatsapp || '';
+const contactEmail = owner?.data.email || '';
+const contactWebsite = data.website || '';
 
 const ogImage = data.images[0] ?? '/og-default.jpg';
 const hasMap = data.location?.lat !== undefined && data.location?.lng !== undefined;
@@ -395,7 +387,7 @@ const breadcrumbLd = {
         <div class="listings-grid">
           {related.map((r) => (
             <ListingCard
-              href={url(`/${r.data.category.id}/${r.id}`)}
+              href={url(`/${r.categorySlug}/${r.id}`)}
               title={r.data.title}
               excerpt={r.data.excerpt}
               image={r.data.images[0]}

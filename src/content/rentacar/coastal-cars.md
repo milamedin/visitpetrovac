@@ -1,12 +1,12 @@
 ---
 title: Coastal Cars — premium rent-a-car
-category: rent-a-car
 excerpt: >-
   Premium klase vozila — BMW, Mercedes, SUV. Dostava na željenu lokaciju u
   Petrovcu.
 price_from: 55
 price_unit: per_day
 premium: true
+created_at: 2026-05-24
 amenities:
   - Premium klase
   - Polno osiguranje
@@ -16,11 +16,6 @@ amenities:
   - Dječije sjedište
 images:
   - /uploads/listings/demo-castle.jpg
-contact:
-  phone: +382 67 012 345
-  whatsapp: '+38267012345'
-  email: coastal@example.com
-  website: ''
 location:
   address: Petrovac (dostava na adresu)
 rating: 4.9

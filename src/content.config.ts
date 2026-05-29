@@ -76,45 +76,46 @@ const owners = defineCollection({
   })),
 });
 
-const listings = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/listings' }),
+// ─── Shared base for all 5 listing collections ──────────────────────
+// Contact lives ONLY on owner — listings get owner.contact via Astro fallback.
+// `website` (per-listing) stays as a free-standing field for places that
+// have their own URL (e.g., hotel booking page) that differs from the owner.
+const baseListingFields = {
+  title: z.string(),
+  owner: reference('owners').optional(),
+  excerpt: z.string().max(200),
+  price_from: z.number().optional(),
+  price_unit: z.enum(['per_night', 'per_person', 'per_day', 'per_meal', 'fixed']).default('per_night'),
+  premium: z.boolean().default(false),
+  created_at: z.coerce.date().optional(),
+  amenities: z.array(z.string()).default([]),
+  images: z.array(z.string()).default([]),
+  capacity: z.number().optional(),
+  website: z.string().url().optional(),
+  location: z.object({
+    lat: z.number().optional(),
+    lng: z.number().optional(),
+    address: z.string().optional(),
+  }).optional(),
+  rating: z.number().min(0).max(5).optional(),
+  booking_url: z.string().url().optional(),
+  youtube_url: z.string().url().optional(),
+  neighborhood: reference('neighborhoods').optional(),
+  published: z.boolean().default(true),
+  translations: localeOf({
+    title: translatedString,
+    excerpt: translatedString,
+    amenities: z.array(z.string()).optional(),
+  }),
+  body_translations: bodyTranslations,
+  source_hash: sourceHash,
+};
+
+const smjestaj = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/smjestaj' }),
   schema: z.preprocess(stripEmpties, z.object({
-    title: z.string(),
-    category: reference('categories'),
-    owner: reference('owners').optional(),
-    excerpt: z.string().max(200),
-    price_from: z.number().optional(),
-    price_unit: z.enum(['per_night', 'per_person', 'per_day', 'per_meal', 'fixed']).default('per_night'),
-    premium: z.boolean().default(false),
-    amenities: z.array(z.string()).default([]),
-    images: z.array(z.string()).default([]),
-    capacity: z.number().optional(),
-    contact: z.object({
-      phone: z.string().optional(),
-      whatsapp: z.string().optional(),
-      email: z.string().email().optional(),
-      website: z.string().url().optional(),
-    }),
-    location: z.object({
-      lat: z.number().optional(),
-      lng: z.number().optional(),
-      address: z.string().optional(),
-    }).optional(),
-    rating: z.number().min(0).max(5).optional(),
-    booking_url: z.string().url().optional(),
-    youtube_url: z.string().url().optional(),
+    ...baseListingFields,
     accommodation_type: z.enum(['hotel', 'vila', 'kuca', 'apartman', 'soba']).optional(),
-    restaurant_type: z
-      .enum(['restoran', 'konoba', 'pizzeria', 'slasticarna', 'bar', 'beach-bar'])
-      .optional(),
-    activity_type: z
-      .enum(['brod', 'kajak-sup', 'ronjenje', 'hiking', 'ribolov', 'kultura', 'gastro', 'foto'])
-      .optional(),
-    shop_type: z
-      .enum(['apoteka', 'prodavnica', 'pijaca', 'market', 'butik', 'suveniri', 'ostalo'])
-      .optional(),
-    neighborhood: reference('neighborhoods').optional(),
-    menu_url: z.string().optional(),
     units: z
       .array(
         z.object({
@@ -126,14 +127,44 @@ const listings = defineCollection({
         }),
       )
       .optional(),
-    published: z.boolean().default(true),
-    translations: localeOf({
-      title: translatedString,
-      excerpt: translatedString,
-      amenities: z.array(z.string()).optional(),
-    }),
-    body_translations: bodyTranslations,
-    source_hash: sourceHash,
+  })),
+});
+
+const restorani = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/restorani' }),
+  schema: z.preprocess(stripEmpties, z.object({
+    ...baseListingFields,
+    restaurant_type: z
+      .enum(['restoran', 'konoba', 'pizzeria', 'slasticarna', 'bar', 'beach-bar'])
+      .optional(),
+    menu_url: z.string().optional(),
+  })),
+});
+
+const iskustva = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/iskustva' }),
+  schema: z.preprocess(stripEmpties, z.object({
+    ...baseListingFields,
+    activity_type: z
+      .enum(['brod', 'kajak-sup', 'ronjenje', 'hiking', 'ribolov', 'kultura', 'gastro', 'foto'])
+      .optional(),
+  })),
+});
+
+const rentacar = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/rentacar' }),
+  schema: z.preprocess(stripEmpties, z.object({
+    ...baseListingFields,
+  })),
+});
+
+const trgovina = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/trgovina' }),
+  schema: z.preprocess(stripEmpties, z.object({
+    ...baseListingFields,
+    shop_type: z
+      .enum(['apoteka', 'prodavnica', 'pijaca', 'market', 'butik', 'suveniri', 'ostalo'])
+      .optional(),
   })),
 });
 
@@ -166,4 +197,17 @@ const pages = defineCollection({
   })),
 });
 
-export const collections = { categories, neighborhoods, owners, listings, posts, pages };
+export const collections = {
+  categories,
+  neighborhoods,
+  owners,
+  smjestaj,
+  restorani,
+  iskustva,
+  rentacar,
+  trgovina,
+  posts,
+  pages,
+};
+// URL slug → collection mapping lives in src/lib/categories.ts (kept out
+// of this file to avoid circular import with src/lib/listings.ts).

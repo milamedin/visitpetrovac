@@ -1,6 +1,5 @@
 ---
 title: Kajak izlet do Lučica plaže
-category: iskustva
 owner: dragan-radulovic
 excerpt: >-
   Poludnevni vodeni kajak izlet od Petrovca do skrivene Lučice plaže. Trajanje
@@ -17,10 +16,6 @@ images:
   - /uploads/listings/demo-buljarica.jpg
 capacity: 8
 activity_type: kajak-sup
-contact:
-  phone: +382 67 345 678
-  whatsapp: '+38267345678'
-  email: kajak@example.com
 location:
   lat: 42.2058
   lng: 18.9444

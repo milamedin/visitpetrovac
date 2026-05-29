@@ -1,6 +1,5 @@
 ---
 title: Konoba Buljarica — riblji specijaliteti uz pijesak
-category: restorani
 excerpt: >-
   Mala konoba 50m od pješčane plaže Buljarica. Riba sa lokalnih brodova,
   jagnjetina ispod sača.
@@ -17,9 +16,6 @@ images:
   - /uploads/listings/demo-buljarica.jpg
 capacity: 80
 restaurant_type: konoba
-contact:
-  phone: +382 33 461 444
-  email: konoba.buljarica@example.com
 location:
   lat: 42.1935
   lng: 18.958

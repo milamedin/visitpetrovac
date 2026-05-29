@@ -1,6 +1,5 @@
 ---
 title: Studio Castello — pogled na staru tvrđavu
-category: smjestaj
 owner: jelena-pavlovic
 excerpt: >-
   Mali studio za 2 osobe, smješten 30m od stare tvrđave Castello. Idealno za
@@ -19,10 +18,6 @@ capacity: 2
 accommodation_type: apartman
 neighborhood: krs-medinski
 
-contact:
-  phone: +382 67 234 567
-  whatsapp: '+38267234567'
-  email: castello@example.com
 location:
   lat: 42.207
   lng: 18.946

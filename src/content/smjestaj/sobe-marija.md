@@ -1,6 +1,5 @@
 ---
 title: Sobe Marija — povoljno smještaj kod centra
-category: smjestaj
 excerpt: >-
   Tri jednostavne sobe sa kupatilom, 200m od centra. Najpovoljnija opcija u
   Petrovcu.
@@ -17,10 +16,6 @@ capacity: 2
 accommodation_type: soba
 neighborhood: donja-ulica
 
-contact:
-  phone: +382 33 461 333
-  whatsapp: '+38267567890'
-  email: marija@example.com
 location:
   lat: 42.2062
   lng: 18.945

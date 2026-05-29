@@ -1,6 +1,5 @@
 ---
 title: Kotor & Perast — cjelodnevna ekskurzija
-category: iskustva
 excerpt: Kotor stari grad + Perast + Gospa od Škrpjela. Polazak iz Petrovca minibusom.
 price_from: 45
 price_unit: per_person
@@ -14,10 +13,6 @@ images:
   - /uploads/listings/demo-panorama.jpg
 capacity: 16
 activity_type: kultura
-contact:
-  phone: +382 67 901 234
-  whatsapp: '+38267901234'
-  email: kotor@example.com
 location:
   address: Polazak iz Petrovca
 rating: 4.7

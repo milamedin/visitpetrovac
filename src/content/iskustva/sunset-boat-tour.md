@@ -1,6 +1,5 @@
 ---
 title: Sunset boat tour — vožnja brodom uz zalazak
-category: iskustva
 owner: dragan-radulovic
 excerpt: >-
   Dvosatna vožnja brodom uz crnogorsku obalu, povratak za zalazak. Šampanjac
@@ -17,10 +16,6 @@ images:
   - /uploads/listings/demo-castle.jpg
 capacity: 12
 activity_type: brod
-contact:
-  phone: +382 67 345 678
-  whatsapp: '+38267345678'
-  email: sunset@example.com
 location:
   address: Petrovačka marina
 rating: 5

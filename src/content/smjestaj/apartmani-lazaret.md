@@ -1,6 +1,5 @@
 ---
 title: Apartmani Lazaret — porodična kuća uz more
-category: smjestaj
 excerpt: >-
   Pet apartmana raznih veličina (2—6 osoba) u porodičnoj kući. Privatni vrt,
   roštilj, parking.
@@ -43,10 +42,6 @@ units:
 accommodation_type: kuca
 neighborhood: donja-ulica
 
-contact:
-  phone: +382 67 678 901
-  whatsapp: '+38267678901'
-  email: lazaret@example.com
 location:
   lat: 42.205
   lng: 18.946

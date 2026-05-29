@@ -1,6 +1,5 @@
 ---
 title: Pizzeria Petrovac
-category: restorani
 excerpt: 'Klasične italijanske pice iz krušne peći. Brza usluga, dostava do apartmana.'
 price_from: 8
 price_unit: per_meal
@@ -14,10 +13,6 @@ images:
   - /uploads/listings/demo-castle.jpg
 capacity: 50
 restaurant_type: pizzeria
-contact:
-  phone: +382 33 461 555
-  whatsapp: '+38267789012'
-  email: pizzeria@example.com
 location:
   lat: 42.2058
   lng: 18.9445

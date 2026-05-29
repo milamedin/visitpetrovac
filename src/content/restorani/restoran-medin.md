@@ -1,6 +1,5 @@
 ---
 title: Restoran Medin — riblji specijaliteti
-category: restorani
 excerpt: >-
   Specijalizovan za morsku hranu i riblje meze. Vlastiti riblji ulov svakog
   jutra.
@@ -15,9 +14,6 @@ images:
   - /uploads/listings/demo-buljarica.jpg
 capacity: 80
 restaurant_type: restoran
-contact:
-  phone: +382 33 461 222
-  email: medin@example.com
 location:
   lat: 42.2065
   lng: 18.945

@@ -1,6 +1,5 @@
 ---
 title: Cjelodnevni izlet — Skadarsko jezero
-category: iskustva
 owner: dragan-radulovic
 excerpt: >-
   Cjelodnevni tour autobusem do Skadarskog jezera. Vožnja brodom, ručak, posjeta
@@ -18,10 +17,6 @@ images:
   - /uploads/listings/demo-panorama.jpg
 capacity: 24
 activity_type: kultura
-contact:
-  phone: +382 67 345 678
-  whatsapp: '+38267345678'
-  email: skadar@example.com
 location:
   address: 'Polazak iz Petrovca, povratak istog dana'
 rating: 4.9

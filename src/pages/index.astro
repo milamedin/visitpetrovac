@@ -6,19 +6,18 @@ import CategoryPill from '../components/CategoryPill.astro';
 import ListingCard from '../components/ListingCard.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
+import { getAllListings, sortPremiumThenNewest } from '../lib/listings';
 
 const { t, url, locale } = useI18n(Astro);
 
 const categories = (await getCollection('categories'))
   .map((c) => applyTranslation(c, locale))
   .sort((a, b) => a.data.order - b.data.order);
-const allListings = (await getCollection('listings', ({ data }) => data.published !== false))
-  .map((l) => applyTranslation(l, locale));
+const allListings = (await getAllListings()).map((l) =>
+  Object.assign(applyTranslation(l, locale), { categorySlug: l.categorySlug }),
+);
 
-const sortedListings = allListings.sort((a, b) => {
-  const score = (l: typeof a) => (l.data.premium ? 1 : 0);
-  return score(b) - score(a);
-});
+const sortedListings = sortPremiumThenNewest(allListings as any) as typeof allListings;
 const featured = sortedListings.slice(0, 6);
 
 const categoryMap = new Map(categories.map((c) => [c.id, c.data.name]));
@@ -92,11 +91,11 @@ const siteLd = {
         {
           featured.map((listing) => (
             <ListingCard
-              href={url(`/${listing.data.category.id}/${listing.id}`)}
+              href={url(`/${listing.categorySlug}/${listing.id}`)}
               title={listing.data.title}
               excerpt={listing.data.excerpt}
               image={listing.data.images[0]}
-              category={categoryMap.get(listing.data.category.id)}
+              category={categoryMap.get(listing.categorySlug)}
               priceFrom={listing.data.price_from}
               priceUnit={listing.data.price_unit}
               rating={listing.data.rating}

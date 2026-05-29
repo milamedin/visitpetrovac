@@ -1,6 +1,5 @@
 ---
 title: Slastičarna Stara škola
-category: restorani
 excerpt: >-
   Domaći kolači, sladoled u kornetu, kafa po starom načinu. Ujutru — palačinke i
   nutela.
@@ -16,9 +15,6 @@ images:
   - /uploads/listings/demo-panorama.jpg
 capacity: 40
 restaurant_type: slasticarna
-contact:
-  phone: +382 33 461 666
-  email: stara.skola@example.com
 location:
   lat: 42.2059
   lng: 18.9446

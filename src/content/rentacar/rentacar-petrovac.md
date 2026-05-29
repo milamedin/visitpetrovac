@@ -1,6 +1,5 @@
 ---
 title: Petrovac Rent-a-car — sve klase auta
-category: rent-a-car
 excerpt: >-
   Lokalna agencija sa 20+ vozila. Preuzimanje u Petrovcu, Tivtu, Podgorici i
   Baru. Bez skrivenih troškova.
@@ -14,10 +13,6 @@ amenities:
   - Preuzimanje na 4 lokacije
 images:
   - /uploads/listings/demo-panorama.jpg
-contact:
-  phone: +382 67 456 789
-  whatsapp: '+38267456789'
-  email: rentacar@example.com
 location:
   address: 'Obala 13. jula bb, Petrovac'
 rating: 4.8

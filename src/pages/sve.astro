@@ -6,6 +6,7 @@ import CategoryPill from '../components/CategoryPill.astro';
 import Picture from '../components/Picture.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
+import { getAllListings, sortPremiumThenNewest } from '../lib/listings';
 
 export const prerender = false;
 
@@ -14,17 +15,17 @@ const { t, url, locale } = useI18n(Astro);
 const allCategories = (await getCollection('categories'))
   .map((c) => applyTranslation(c, locale))
   .sort((a, b) => a.data.order - b.data.order);
-const allListings = (await getCollection('listings', ({ data }) => data.published !== false))
-  .map((l) => applyTranslation(l, locale));
+const allListings = (await getAllListings()).map((l) =>
+  Object.assign(applyTranslation(l, locale), { categorySlug: l.categorySlug }),
+);
 
 const sortParam = Astro.url.searchParams.get('sort') ?? 'premium';
-const sortedListings = [...allListings].sort((a, b) => {
-  if (sortParam === 'price-asc') return (a.data.price_from ?? Infinity) - (b.data.price_from ?? Infinity);
-  if (sortParam === 'price-desc') return (b.data.price_from ?? 0) - (a.data.price_from ?? 0);
-  if (sortParam === 'rating') return (b.data.rating ?? 0) - (a.data.rating ?? 0);
-  const score = (l: typeof a) => (l.data.premium ? 1 : 0);
-  return score(b) - score(a);
-});
+const sortedListings = (() => {
+  if (sortParam === 'price-asc') return [...allListings].sort((a, b) => (a.data.price_from ?? Infinity) - (b.data.price_from ?? Infinity));
+  if (sortParam === 'price-desc') return [...allListings].sort((a, b) => (b.data.price_from ?? 0) - (a.data.price_from ?? 0));
+  if (sortParam === 'rating') return [...allListings].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0));
+  return sortPremiumThenNewest(allListings as any) as typeof allListings;
+})();
 
 const sortOptions = [
   { value: 'premium', label: t('cat.sort.recommended') },
@@ -86,11 +87,11 @@ const categoryMap = new Map(allCategories.map((c) => [c.id, c.data.name]));
       <div class="listings-grid">
         {sortedListings.map((l) => (
           <ListingCard
-            href={url(`/${l.data.category.id}/${l.id}`)}
+            href={url(`/${l.categorySlug}/${l.id}`)}
             title={l.data.title}
             excerpt={l.data.excerpt}
             image={l.data.images[0]}
-            category={categoryMap.get(l.data.category.id)}
+            category={categoryMap.get(l.categorySlug)}
             priceFrom={l.data.price_from}
             priceUnit={l.data.price_unit}
             rating={l.data.rating}

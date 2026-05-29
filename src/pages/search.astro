@@ -5,6 +5,7 @@ import ListingCard from '../components/ListingCard.astro';
 import SearchBar from '../components/SearchBar.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
+import { getAllListings, type ListingWithCategory } from '../lib/listings';
 
 export const prerender = false;
 
@@ -14,12 +15,13 @@ const q = (Astro.url.searchParams.get('q') ?? '').trim();
 const allCategories = (await getCollection('categories')).map((c) => applyTranslation(c, locale));
 const categoryMap = new Map(allCategories.map((c) => [c.id, c.data.name]));
 
-let results: Awaited<ReturnType<typeof getCollection<'listings'>>> = [];
+type ResultEntry = ListingWithCategory & {};
+let results: ResultEntry[] = [];
 
 if (q.length >= 2) {
   const needle = q.toLocaleLowerCase('sr');
-  const all = (await getCollection('listings', ({ data }) => data.published !== false)).map((l) =>
-    applyTranslation(l, locale),
+  const all = (await getAllListings()).map((l) =>
+    Object.assign(applyTranslation(l, locale), { categorySlug: l.categorySlug }),
   );
 
   results = all
@@ -29,7 +31,7 @@ if (q.length >= 2) {
         l.data.excerpt,
         l.data.location?.address ?? '',
         ...l.data.amenities,
-        categoryMap.get(l.data.category.id) ?? '',
+        categoryMap.get(l.categorySlug) ?? '',
       ]
         .join(' ')
         .toLocaleLowerCase('sr');
@@ -43,7 +45,7 @@ if (q.length >= 2) {
     })
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score)
-    .map((x) => x.listing);
+    .map((x) => x.listing) as ResultEntry[];
 }
 
 const noQuery = q.length === 0;
@@ -81,11 +83,11 @@ const tooShort = q.length > 0 && q.length < 2;
         <div class="listings-grid">
           {results.map((l) => (
             <ListingCard
-              href={url(`/${l.data.category.id}/${l.id}`)}
+              href={url(`/${l.categorySlug}/${l.id}`)}
               title={l.data.title}
               excerpt={l.data.excerpt}
               image={l.data.images[0]}
-              category={categoryMap.get(l.data.category.id)}
+              category={categoryMap.get(l.categorySlug)}
               priceFrom={l.data.price_from}
               priceUnit={l.data.price_unit}
               rating={l.data.rating}

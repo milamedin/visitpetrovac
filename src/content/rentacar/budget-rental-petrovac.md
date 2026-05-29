@@ -1,6 +1,5 @@
 ---
 title: Budget Rental — najpovoljniji rent-a-car
-category: rent-a-car
 excerpt: >-
   Mala kompaktna vozila po najpovoljnijim cijenama. Bez depozita za EU vozačke
   dozvole.
@@ -13,10 +12,6 @@ amenities:
   - Long-rent popusti
 images:
   - /uploads/listings/demo-buljarica.jpg
-contact:
-  phone: +382 67 123 456
-  whatsapp: '+38267123456'
-  email: budget@example.com
 location:
   address: 'Šetalište 22, Petrovac'
 rating: 4.4

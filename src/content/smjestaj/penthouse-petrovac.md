@@ -1,12 +1,12 @@
 ---
 title: Penthouse Petrovac — luksuzni krov sa pogledom 360°
-category: smjestaj
 excerpt: >-
   Penthouse stan na vrhu zgrade u centru. Krovna terasa sa jacuzzi-jem, pogled
   na cijelu rivijeru.
 price_from: 180
 price_unit: per_night
 premium: true
+created_at: 2026-05-24
 amenities:
   - WiFi
   - Klima
@@ -22,11 +22,6 @@ capacity: 6
 accommodation_type: apartman
 neighborhood: donja-ulica
 
-contact:
-  phone: +382 67 456 789
-  whatsapp: '+38267456789'
-  email: penthouse@example.com
-  website: ''
 location:
   lat: 42.2055
   lng: 18.9442

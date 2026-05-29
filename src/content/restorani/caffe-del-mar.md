@@ -1,6 +1,5 @@
 ---
 title: Caffe del Mar — bar sa pogledom na zalazak
-category: restorani
 excerpt: 'Cocktail bar uz samu plažu. Najbolji zalazak u Petrovcu, live DJ vikendom.'
 price_from: 6
 price_unit: per_meal
@@ -14,9 +13,6 @@ images:
   - /uploads/listings/demo-castle.jpg
 capacity: 60
 restaurant_type: beach-bar
-contact:
-  phone: +382 67 890 123
-  email: delmar@example.com
 location:
   lat: 42.2061
   lng: 18.9444

@@ -1,6 +1,5 @@
 ---
 title: Apartmani Buljarica — mir uz pješčanu plažu
-category: smjestaj
 owner: marko-perovic
 excerpt: >-
   Dva apartmana okružena maslinjacima, 100m od pješčane plaže Buljarice. Mir,
@@ -19,10 +18,6 @@ capacity: 5
 accommodation_type: apartman
 neighborhood: buljarica
 
-contact:
-  phone: +382 67 234 567
-  whatsapp: '+38267234567'
-  email: buljarica@example.com
 location:
   lat: 42.1933
   lng: 18.9583

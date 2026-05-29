@@ -1,6 +1,5 @@
 ---
 title: Villa Azur — apartmani sa pogledom na more
-category: smjestaj
 owner: marko-perovic
 excerpt: >-
   Tri apartmana 50m od plaže, sa terasom i pogledom na more. Klima, parking,
@@ -8,6 +7,7 @@ excerpt: >-
 price_from: 65
 price_unit: per_night
 premium: true
+created_at: 2026-05-24
 amenities:
   - WiFi
   - Klima
@@ -22,10 +22,6 @@ capacity: 4
 accommodation_type: apartman
 neighborhood: donja-ulica
 
-contact:
-  phone: +382 67 123 456
-  whatsapp: '+38267123456'
-  email: villa.azur@example.com
 location:
   lat: 42.2058
   lng: 18.9444
