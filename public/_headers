@@ -1,0 +1,8 @@
+# Admin panel should never be cached — CMS config changes need to apply immediately.
+/admin/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/admin/config.yml
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
