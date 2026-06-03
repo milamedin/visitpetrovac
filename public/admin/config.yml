@@ -17,37 +17,376 @@ locale: 'en'
 publish_mode: simple
 
 collections:
-  - name: "categories"
-    label: "Kategorije"
-    label_singular: "Kategorija"
-    folder: "src/content/categories"
-    create: false
-    delete: false
-    slug: "{{slug}}"
-    extension: "md"
-    format: "frontmatter"
-    summary: "{{name}}"
-    fields:
-      - { name: "name", label: "Naziv", widget: "string" }
-      - { name: "description", label: "Opis", widget: "text", required: false }
-      - { name: "icon", label: "Emoji ikona", widget: "string", required: false }
-      - { name: "order", label: "Redosljed", widget: "number", default: 0, value_type: "int" }
-      - { name: "hero_image", label: "Hero slika", widget: "image", required: false, choose_url: false }
-      - { name: "body", label: "Sadržaj", widget: "markdown", required: false }
+  # ────────── LISTINZI ──────────
+  - divider: true
+    label: "📌 Listinzi"
 
-  - name: "neighborhoods"
-    label: "Naselja"
-    label_singular: "Naselje"
-    folder: "src/content/neighborhoods"
+  - name: "smjestaj"
+    label: "Smještaj"
+    label_singular: "Smještaj"
+    folder: "src/content/smjestaj"
     create: true
     slug: "{{slug}}"
     extension: "md"
     format: "frontmatter"
-    summary: "{{name}}"
+    summary: "{{title}}"
+    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
+    view_filters:
+      - { label: "Premium", field: "premium", pattern: true }
     fields:
-      - { name: "name", label: "Naziv naselja", widget: "string" }
-      - { name: "description", label: "Kratki opis", widget: "text", required: false }
-      - { name: "order", label: "Redosljed prikaza", widget: "number", default: 0, value_type: "int" }
+      - { name: "title", label: "Naslov", widget: "string" }
+      - name: "owner"
+        label: "Vlasnik (kontakt se povlači odavde)"
+        widget: "relation"
+        collection: "owners"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - name: "accommodation_type"
+        label: "Tip smještaja"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Hotel", value: "hotel" }
+          - { label: "Vila", value: "vila" }
+          - { label: "Kuća", value: "kuca" }
+          - { label: "Apartman", value: "apartman" }
+          - { label: "Soba", value: "soba" }
+      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
+      - name: "price_unit"
+        label: "Jedinica cijene"
+        widget: "select"
+        default: "per_night"
+        options:
+          - { label: "Po noći", value: "per_night" }
+          - { label: "Po osobi", value: "per_person" }
+          - { label: "Fiksno", value: "fixed" }
+      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
+      - name: "neighborhood"
+        label: "Naselje"
+        widget: "relation"
+        collection: "neighborhoods"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "amenities", label: "Pogodnosti (WiFi, Klima, Parking, Bazen...)", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
+      - name: "images"
+        label: "Fotografije"
+        widget: "list"
+        media_folder: "/public/uploads/listings"
+        public_folder: "/uploads/listings"
+        field: { name: "src", label: "Fotografija", widget: "image" }
+      - name: "units"
+        label: "Smještajne jedinice (samo za kuće sa više apartmana / hotele — ostavi prazno za samostalni objekat)"
+        widget: "list"
+        required: false
+        summary: "{{fields.name}} — {{fields.capacity}} osoba — od {{fields.price_from}}€"
+        fields:
+          - { name: "name", label: "Naziv jedinice", widget: "string" }
+          - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", value_type: "int", min: 1 }
+          - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
+          - { name: "description", label: "Kratki opis", widget: "text", required: false }
+          - { name: "image", label: "Fotografija jedinice", widget: "image", required: false, media_folder: "/public/uploads/listings", public_folder: "/uploads/listings" }
+      - name: "location"
+        label: "Lokacija"
+        widget: "object"
+        required: false
+        fields:
+          - { name: "address", label: "Adresa", widget: "string", required: false }
+          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
+          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
+      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
+      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
+      - { name: "website", label: "Sajt objekta (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
+      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
+
+  - name: "restorani"
+    label: "Restorani i kafići"
+    label_singular: "Restoran / kafić"
+    folder: "src/content/restorani"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}}"
+    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
+    view_filters:
+      - { label: "Premium", field: "premium", pattern: true }
+    fields:
+      - { name: "title", label: "Naslov", widget: "string" }
+      - name: "owner"
+        label: "Vlasnik (kontakt se povlači odavde)"
+        widget: "relation"
+        collection: "owners"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - name: "restaurant_type"
+        label: "Tip restorana"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Restoran", value: "restoran" }
+          - { label: "Konoba", value: "konoba" }
+          - { label: "Pizzeria", value: "pizzeria" }
+          - { label: "Slastičarna", value: "slasticarna" }
+          - { label: "Bar / Kafić", value: "bar" }
+          - { label: "Beach bar", value: "beach-bar" }
+      - { name: "price_from", label: "Prosječna cijena obroka (€)", widget: "number", required: false, value_type: "int", min: 0 }
+      - name: "price_unit"
+        label: "Jedinica cijene"
+        widget: "select"
+        default: "per_meal"
+        options:
+          - { label: "Po obroku", value: "per_meal" }
+          - { label: "Po osobi", value: "per_person" }
+          - { label: "Fiksno", value: "fixed" }
+      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
+      - name: "neighborhood"
+        label: "Naselje"
+        widget: "relation"
+        collection: "neighborhoods"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "amenities", label: "Pogodnosti (Terasa, Pogled na more, Live muzika, Domaće vino...)", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
+      - name: "images"
+        label: "Fotografije"
+        widget: "list"
+        media_folder: "/public/uploads/listings"
+        public_folder: "/uploads/listings"
+        field: { name: "src", label: "Fotografija", widget: "image" }
+      - name: "menu_url"
+        label: "Meni / jelovnik (PDF ili slika)"
+        widget: "file"
+        required: false
+        media_folder: "/public/uploads/menus"
+        public_folder: "/uploads/menus"
+      - name: "location"
+        label: "Lokacija"
+        widget: "object"
+        required: false
+        fields:
+          - { name: "address", label: "Adresa", widget: "string", required: false }
+          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
+          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
+      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
+      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
+      - { name: "website", label: "Sajt objekta (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
+      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
+
+  - name: "iskustva"
+    label: "Iskustva"
+    label_singular: "Iskustvo"
+    folder: "src/content/iskustva"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}}"
+    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
+    view_filters:
+      - { label: "Premium", field: "premium", pattern: true }
+    fields:
+      - { name: "title", label: "Naslov", widget: "string" }
+      - name: "owner"
+        label: "Vlasnik / organizator (kontakt se povlači odavde)"
+        widget: "relation"
+        collection: "owners"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - name: "activity_type"
+        label: "Tip iskustva"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Izlet brodom", value: "brod" }
+          - { label: "Kajak / SUP", value: "kajak-sup" }
+          - { label: "Ronjenje", value: "ronjenje" }
+          - { label: "Hiking", value: "hiking" }
+          - { label: "Ribolov", value: "ribolov" }
+          - { label: "Kultura / istorija", value: "kultura" }
+          - { label: "Gastro / kuvanje", value: "gastro" }
+          - { label: "Fotoshooting", value: "foto" }
+      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
+      - name: "price_unit"
+        label: "Jedinica cijene"
+        widget: "select"
+        default: "per_person"
+        options:
+          - { label: "Po osobi", value: "per_person" }
+          - { label: "Po danu", value: "per_day" }
+          - { label: "Fiksno", value: "fixed" }
+      - { name: "capacity", label: "Maksimalan broj učesnika", widget: "number", required: false, value_type: "int" }
+      - name: "neighborhood"
+        label: "Polazna tačka (naselje)"
+        widget: "relation"
+        collection: "neighborhoods"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "amenities", label: "Šta je uključeno (Vodič, Oprema, Transport, Ručak...)", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
+      - name: "images"
+        label: "Fotografije"
+        widget: "list"
+        media_folder: "/public/uploads/listings"
+        public_folder: "/uploads/listings"
+        field: { name: "src", label: "Fotografija", widget: "image" }
+      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
+      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
+      - { name: "website", label: "Sajt organizatora (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
+      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
+
+  - name: "rentacar"
+    label: "Rent-a-car"
+    label_singular: "Rent-a-car agencija"
+    folder: "src/content/rentacar"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}}"
+    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
+    view_filters:
+      - { label: "Premium", field: "premium", pattern: true }
+    fields:
+      - { name: "title", label: "Naslov agencije", widget: "string" }
+      - name: "owner"
+        label: "Vlasnik / kontakt agencije (kontakt se povlači odavde)"
+        widget: "relation"
+        collection: "owners"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "price_from", label: "Najjeftinija cijena (€/dan)", widget: "number", required: false, value_type: "int", min: 0 }
+      - name: "price_unit"
+        label: "Jedinica cijene"
+        widget: "select"
+        default: "per_day"
+        options:
+          - { label: "Po danu", value: "per_day" }
+          - { label: "Fiksno", value: "fixed" }
+      - name: "neighborhood"
+        label: "Mjesto preuzimanja (naselje)"
+        widget: "relation"
+        collection: "neighborhoods"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "amenities", label: "Usluge (Dostava do aerodroma, Auto-sjedište, Kasko osiguranje, GPS...)", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
+      - name: "images"
+        label: "Fotografije vozila / agencije"
+        widget: "list"
+        media_folder: "/public/uploads/listings"
+        public_folder: "/uploads/listings"
+        field: { name: "src", label: "Fotografija", widget: "image" }
+      - name: "location"
+        label: "Lokacija preuzimanja"
+        widget: "object"
+        required: false
+        fields:
+          - { name: "address", label: "Adresa", widget: "string", required: false }
+          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
+          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
+      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
+      - { name: "website", label: "Sajt agencije (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
+      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
+
+  - name: "trgovina"
+    label: "Trgovina"
+    label_singular: "Trgovina"
+    folder: "src/content/trgovina"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}}"
+    sortable_fields: ['title', 'rating', 'created_at']
+    view_filters:
+      - { label: "Premium", field: "premium", pattern: true }
+    fields:
+      - { name: "title", label: "Naziv", widget: "string" }
+      - name: "owner"
+        label: "Vlasnik (kontakt se povlači odavde)"
+        widget: "relation"
+        collection: "owners"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - name: "shop_type"
+        label: "Tip trgovine"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Prodavnica", value: "prodavnica" }
+          - { label: "Market / supermarket", value: "market" }
+          - { label: "Apoteka", value: "apoteka" }
+          - { label: "Pijaca", value: "pijaca" }
+          - { label: "Butik / odjeća", value: "butik" }
+          - { label: "Suveniri", value: "suveniri" }
+          - { label: "Ostalo", value: "ostalo" }
+      - name: "neighborhood"
+        label: "Naselje"
+        widget: "relation"
+        collection: "neighborhoods"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+      - { name: "amenities", label: "Pogodnosti (Radi nedjeljom, Kartice, Dostava, Organsko...)", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
+      - name: "images"
+        label: "Fotografije"
+        widget: "list"
+        media_folder: "/public/uploads/listings"
+        public_folder: "/uploads/listings"
+        field: { name: "src", label: "Fotografija", widget: "image" }
+      - name: "location"
+        label: "Lokacija"
+        widget: "object"
+        required: false
+        fields:
+          - { name: "address", label: "Adresa", widget: "string", required: false }
+          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
+          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
+      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
+      - { name: "website", label: "Sajt (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
+      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
+      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
+      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
+
+  # ────────── MASTER PODACI ──────────
+  - divider: true
+    label: "🗂 Master podaci (za listinge)"
 
   - name: "owners"
     label: "Vlasnici"
@@ -78,403 +417,41 @@ collections:
           - { label: "Français", value: "fr" }
           - { label: "Italiano", value: "it" }
 
-  - name: "smjestaj"
-    label: "Smještaj"
-    label_singular: "Smještaj"
-    folder: "src/content/smjestaj"
+  - name: "neighborhoods"
+    label: "Naselja"
+    label_singular: "Naselje"
+    folder: "src/content/neighborhoods"
     create: true
     slug: "{{slug}}"
     extension: "md"
     format: "frontmatter"
-    summary: "{{title}}"
-    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
-    view_filters:
-      - { label: "Premium", field: "premium", pattern: true }
+    summary: "{{name}}"
     fields:
-      - { name: "title", label: "Naslov", widget: "string" }
-      - name: "owner"
-        label: "Vlasnik (preporučeno — kontakt se povlači odavde)"
-        widget: "relation"
-        collection: "owners"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
-      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
-      - name: "price_unit"
-        label: "Jedinica cijene"
-        widget: "select"
-        default: "per_night"
-        options:
-          - { label: "Po noći", value: "per_night" }
-          - { label: "Po osobi", value: "per_person" }
-          - { label: "Po danu", value: "per_day" }
-          - { label: "Po obroku", value: "per_meal" }
-          - { label: "Fiksno", value: "fixed" }
-      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
-      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL'] }
-      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
-      - { name: "website", label: "Sajt objekta (URL, opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
-      - name: "neighborhood"
-        label: "Naselje"
-        widget: "relation"
-        collection: "neighborhoods"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "amenities", label: "Pogodnosti / osobine", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
-      - name: "images"
-        label: "Fotografije"
-        widget: "list"
-        media_folder: "/public/uploads/listings"
-        public_folder: "/uploads/listings"
-        field: { name: "src", label: "Fotografija", widget: "image" }
-      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
-      - name: "location"
-        label: "Lokacija"
-        widget: "object"
-        required: false
-        fields:
-          - { name: "address", label: "Adresa", widget: "string", required: false }
-          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
-          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
-      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
-      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
-      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
-      - name: "accommodation_type"
-        label: "Tip smještaja"
-        widget: "select"
-        required: false
-        options:
-          - { label: "Hotel", value: "hotel" }
-          - { label: "Vila", value: "vila" }
-          - { label: "Kuća", value: "kuca" }
-          - { label: "Apartman", value: "apartman" }
-          - { label: "Soba", value: "soba" }
-      - name: "units"
-        label: "Smještajne jedinice (za kuće sa više apartmana — ostavi prazno za samostalni objekat)"
-        widget: "list"
-        required: false
-        summary: "{{fields.name}} — {{fields.capacity}} osoba — od {{fields.price_from}}€"
-        fields:
-          - { name: "name", label: "Naziv jedinice", widget: "string" }
-          - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", value_type: "int", min: 1 }
-          - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
-          - { name: "description", label: "Kratki opis", widget: "text", required: false }
-          - { name: "image", label: "Fotografija jedinice", widget: "image", required: false, media_folder: "/public/uploads/listings", public_folder: "/uploads/listings" }
+      - { name: "name", label: "Naziv naselja", widget: "string" }
+      - { name: "description", label: "Kratki opis", widget: "text", required: false }
+      - { name: "order", label: "Redosljed prikaza", widget: "number", default: 0, value_type: "int" }
 
-  - name: "restorani"
-    label: "Restorani i kafići"
-    label_singular: "Restoran / kafić"
-    folder: "src/content/restorani"
-    create: true
+  - name: "categories"
+    label: "Kategorije sajta"
+    label_singular: "Kategorija"
+    folder: "src/content/categories"
+    create: false
+    delete: false
     slug: "{{slug}}"
     extension: "md"
     format: "frontmatter"
-    summary: "{{title}}"
-    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
-    view_filters:
-      - { label: "Premium", field: "premium", pattern: true }
+    summary: "{{name}}"
     fields:
-      - { name: "title", label: "Naslov", widget: "string" }
-      - name: "owner"
-        label: "Vlasnik (preporučeno — kontakt se povlači odavde)"
-        widget: "relation"
-        collection: "owners"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
-      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
-      - name: "price_unit"
-        label: "Jedinica cijene"
-        widget: "select"
-        default: "per_night"
-        options:
-          - { label: "Po noći", value: "per_night" }
-          - { label: "Po osobi", value: "per_person" }
-          - { label: "Po danu", value: "per_day" }
-          - { label: "Po obroku", value: "per_meal" }
-          - { label: "Fiksno", value: "fixed" }
-      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
-      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL'] }
-      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
-      - { name: "website", label: "Sajt objekta (URL, opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
-      - name: "neighborhood"
-        label: "Naselje"
-        widget: "relation"
-        collection: "neighborhoods"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "amenities", label: "Pogodnosti / osobine", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
-      - name: "images"
-        label: "Fotografije"
-        widget: "list"
-        media_folder: "/public/uploads/listings"
-        public_folder: "/uploads/listings"
-        field: { name: "src", label: "Fotografija", widget: "image" }
-      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
-      - name: "location"
-        label: "Lokacija"
-        widget: "object"
-        required: false
-        fields:
-          - { name: "address", label: "Adresa", widget: "string", required: false }
-          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
-          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
-      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
-      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
-      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
-      - name: "restaurant_type"
-        label: "Tip restorana"
-        widget: "select"
-        required: false
-        options:
-          - { label: "Restoran", value: "restoran" }
-          - { label: "Konoba", value: "konoba" }
-          - { label: "Pizzeria", value: "pizzeria" }
-          - { label: "Slastičarna", value: "slasticarna" }
-          - { label: "Bar / Kafić", value: "bar" }
-          - { label: "Beach bar", value: "beach-bar" }
-      - name: "menu_url"
-        label: "Meni / jelovnik (PDF ili slika)"
-        widget: "file"
-        required: false
-        media_folder: "/public/uploads/menus"
-        public_folder: "/uploads/menus"
+      - { name: "name", label: "Naziv", widget: "string" }
+      - { name: "description", label: "Opis", widget: "text", required: false }
+      - { name: "icon", label: "Emoji ikona", widget: "string", required: false }
+      - { name: "order", label: "Redosljed", widget: "number", default: 0, value_type: "int" }
+      - { name: "hero_image", label: "Hero slika", widget: "image", required: false, choose_url: false }
+      - { name: "body", label: "Sadržaj", widget: "markdown", required: false }
 
-  - name: "iskustva"
-    label: "Iskustva"
-    label_singular: "Iskustvo"
-    folder: "src/content/iskustva"
-    create: true
-    slug: "{{slug}}"
-    extension: "md"
-    format: "frontmatter"
-    summary: "{{title}}"
-    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
-    view_filters:
-      - { label: "Premium", field: "premium", pattern: true }
-    fields:
-      - { name: "title", label: "Naslov", widget: "string" }
-      - name: "owner"
-        label: "Vlasnik (preporučeno — kontakt se povlači odavde)"
-        widget: "relation"
-        collection: "owners"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
-      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
-      - name: "price_unit"
-        label: "Jedinica cijene"
-        widget: "select"
-        default: "per_night"
-        options:
-          - { label: "Po noći", value: "per_night" }
-          - { label: "Po osobi", value: "per_person" }
-          - { label: "Po danu", value: "per_day" }
-          - { label: "Po obroku", value: "per_meal" }
-          - { label: "Fiksno", value: "fixed" }
-      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
-      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL'] }
-      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
-      - { name: "website", label: "Sajt objekta (URL, opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
-      - name: "neighborhood"
-        label: "Naselje"
-        widget: "relation"
-        collection: "neighborhoods"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "amenities", label: "Pogodnosti / osobine", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
-      - name: "images"
-        label: "Fotografije"
-        widget: "list"
-        media_folder: "/public/uploads/listings"
-        public_folder: "/uploads/listings"
-        field: { name: "src", label: "Fotografija", widget: "image" }
-      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
-      - name: "location"
-        label: "Lokacija"
-        widget: "object"
-        required: false
-        fields:
-          - { name: "address", label: "Adresa", widget: "string", required: false }
-          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
-          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
-      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
-      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
-      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
-      - name: "activity_type"
-        label: "Tip iskustva"
-        widget: "select"
-        required: false
-        options:
-          - { label: "Izlet brodom", value: "brod" }
-          - { label: "Kajak / SUP", value: "kajak-sup" }
-          - { label: "Ronjenje", value: "ronjenje" }
-          - { label: "Hiking", value: "hiking" }
-          - { label: "Ribolov", value: "ribolov" }
-          - { label: "Kultura / istorija", value: "kultura" }
-          - { label: "Gastro / kuvanje", value: "gastro" }
-          - { label: "Fotoshooting", value: "foto" }
-
-  - name: "rentacar"
-    label: "Rent-a-car"
-    label_singular: "Rent-a-car agencija"
-    folder: "src/content/rentacar"
-    create: true
-    slug: "{{slug}}"
-    extension: "md"
-    format: "frontmatter"
-    summary: "{{title}}"
-    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
-    view_filters:
-      - { label: "Premium", field: "premium", pattern: true }
-    fields:
-      - { name: "title", label: "Naslov", widget: "string" }
-      - name: "owner"
-        label: "Vlasnik (preporučeno — kontakt se povlači odavde)"
-        widget: "relation"
-        collection: "owners"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
-      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
-      - name: "price_unit"
-        label: "Jedinica cijene"
-        widget: "select"
-        default: "per_night"
-        options:
-          - { label: "Po noći", value: "per_night" }
-          - { label: "Po osobi", value: "per_person" }
-          - { label: "Po danu", value: "per_day" }
-          - { label: "Po obroku", value: "per_meal" }
-          - { label: "Fiksno", value: "fixed" }
-      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
-      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL'] }
-      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
-      - { name: "website", label: "Sajt objekta (URL, opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
-      - name: "neighborhood"
-        label: "Naselje"
-        widget: "relation"
-        collection: "neighborhoods"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "amenities", label: "Pogodnosti / osobine", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
-      - name: "images"
-        label: "Fotografije"
-        widget: "list"
-        media_folder: "/public/uploads/listings"
-        public_folder: "/uploads/listings"
-        field: { name: "src", label: "Fotografija", widget: "image" }
-      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
-      - name: "location"
-        label: "Lokacija"
-        widget: "object"
-        required: false
-        fields:
-          - { name: "address", label: "Adresa", widget: "string", required: false }
-          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
-          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
-      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
-      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
-      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
-
-  - name: "trgovina"
-    label: "Trgovina"
-    label_singular: "Trgovina"
-    folder: "src/content/trgovina"
-    create: true
-    slug: "{{slug}}"
-    extension: "md"
-    format: "frontmatter"
-    summary: "{{title}}"
-    sortable_fields: ['title', 'price_from', 'rating', 'created_at']
-    view_filters:
-      - { label: "Premium", field: "premium", pattern: true }
-    fields:
-      - { name: "title", label: "Naslov", widget: "string" }
-      - name: "owner"
-        label: "Vlasnik (preporučeno — kontakt se povlači odavde)"
-        widget: "relation"
-        collection: "owners"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
-      - { name: "price_from", label: "Cijena od (€)", widget: "number", required: false, value_type: "int", min: 0 }
-      - name: "price_unit"
-        label: "Jedinica cijene"
-        widget: "select"
-        default: "per_night"
-        options:
-          - { label: "Po noći", value: "per_night" }
-          - { label: "Po osobi", value: "per_person" }
-          - { label: "Po danu", value: "per_day" }
-          - { label: "Po obroku", value: "per_meal" }
-          - { label: "Fiksno", value: "fixed" }
-      - { name: "premium", label: "Premium pozicija (pojavljuje se prvi)", widget: "boolean", default: false }
-      - { name: "created_at", label: "Datum kreiranja", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { name: "booking_url", label: "Booking.com link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi validan URL'] }
-      - { name: "youtube_url", label: "YouTube link (opciono)", widget: "string", required: false, pattern: ['^$|^https?://(www\\.)?(youtube\\.com|youtu\\.be)/.+', 'Ostavi prazno ili unesi YouTube URL'] }
-      - { name: "website", label: "Sajt objekta (URL, opciono)", widget: "string", required: false, pattern: ['^$|^https?://.+', 'Ostavi prazno ili unesi URL'] }
-      - name: "neighborhood"
-        label: "Naselje"
-        widget: "relation"
-        collection: "neighborhoods"
-        search_fields: ["name"]
-        value_field: "{{slug}}"
-        display_fields: ["name"]
-        required: false
-      - { name: "amenities", label: "Pogodnosti / osobine", widget: "list", required: false, default: [], summary: "{{fields.amenity}}" }
-      - name: "images"
-        label: "Fotografije"
-        widget: "list"
-        media_folder: "/public/uploads/listings"
-        public_folder: "/uploads/listings"
-        field: { name: "src", label: "Fotografija", widget: "image" }
-      - { name: "capacity", label: "Kapacitet (osoba)", widget: "number", required: false, value_type: "int" }
-      - name: "location"
-        label: "Lokacija"
-        widget: "object"
-        required: false
-        fields:
-          - { name: "address", label: "Adresa", widget: "string", required: false }
-          - { name: "lat", label: "Geografska širina (lat)", widget: "number", required: false, value_type: "float" }
-          - { name: "lng", label: "Geografska dužina (lng)", widget: "number", required: false, value_type: "float" }
-      - { name: "rating", label: "Ocjena (0—5)", widget: "number", required: false, min: 0, max: 5, step: 0.1, value_type: "float" }
-      - { name: "published", label: "Objavljen", widget: "boolean", default: true }
-      - { name: "body", label: "Detaljan opis (markdown)", widget: "markdown", required: false }
-      - name: "shop_type"
-        label: "Tip trgovine"
-        widget: "select"
-        required: false
-        options:
-          - { label: "Prodavnica", value: "prodavnica" }
-          - { label: "Market / supermarket", value: "market" }
-          - { label: "Apoteka", value: "apoteka" }
-          - { label: "Pijaca", value: "pijaca" }
-          - { label: "Butik / odjeća", value: "butik" }
-          - { label: "Suveniri", value: "suveniri" }
-          - { label: "Ostalo", value: "ostalo" }
+  # ────────── SADRŽAJ SAJTA ──────────
+  - divider: true
+    label: "📝 Sadržaj sajta"
 
   - name: "posts"
     label: "Blog"
@@ -497,7 +474,7 @@ collections:
       - { name: "body", label: "Tekst", widget: "markdown" }
 
   - name: "pages"
-    label: "Stranice"
+    label: "Stranice (O nama, Kontakt, Uslovi...)"
     label_singular: "Stranica"
     folder: "src/content/pages"
     create: true
@@ -507,7 +484,7 @@ collections:
     summary: "{{title}}"
     fields:
       - { name: "title", label: "Naslov", widget: "string" }
-      - { name: "show_in_menu", label: "Prikazi u glavnom meniju", widget: "boolean", default: false }
-      - { name: "show_in_footer", label: "Prikazi u footer-u", widget: "boolean", default: true }
+      - { name: "show_in_menu", label: "Prikaži u glavnom meniju", widget: "boolean", default: false }
+      - { name: "show_in_footer", label: "Prikaži u footer-u", widget: "boolean", default: true }
       - { name: "order", label: "Redosljed", widget: "number", default: 0, value_type: "int" }
       - { name: "body", label: "Sadržaj", widget: "markdown" }
