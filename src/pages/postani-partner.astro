@@ -1,13 +1,36 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const tiers = [
+// Smještaj se naplaćuje po veličini objekta (broj jedinica/soba).
+const smjestajTiers = [
   { name: 'Samostalni apartman', price: 100, features: ['1 listing', 'Sve fotografije', 'Direktan kontakt sa gostima', 'Dodavanje na mapu'] },
   { name: 'Kuća do 5 jedinica', price: 200, features: ['Do 5 jedinica u jednom listingu', 'Sve fotografije', 'Direktan kontakt', 'Dodavanje na mapu'] },
   { name: 'Mini-hotel (6—15)', price: 350, features: ['Do 15 tipova soba', 'Više fotografija po jedinici', 'Premium pozicija na kategoriji', 'Dodavanje na mapu'] },
   { name: 'Hotel (16+)', price: 600, features: ['Neograničeni tipovi soba', 'Premium pozicija', 'Booking widget', 'Dedicated profil stranica'] },
-  { name: 'Restoran', price: 150, features: ['Profil + meni', 'Galerija', 'Direktan kontakt', 'Dodavanje na mapu'] },
-  { name: 'Rent-a-car', price: 150, features: ['Cijenovnik vozila', 'Galerija', 'WhatsApp / Booking link', 'Dodavanje na mapu'] },
+];
+
+// Sve ostale kategorije imaju fiksnu cijenu od 150€/god.
+const ostaleTiers = [
+  {
+    name: 'Restorani, kafići, plažni barovi, poslastičare',
+    price: 150,
+    features: ['Profil + meni (PDF ili slika)', 'Galerija', 'Direktan kontakt sa gostom', 'Dodavanje na mapu'],
+  },
+  {
+    name: 'Iskustva (izleti brodom, kajak, rent-a-boat, ronjenje, ture)',
+    price: 150,
+    features: ['Profil sa rasporedom / cijenom', 'Galerija + YouTube video', 'Direktna rezervacija (WhatsApp/forma)', 'Dodavanje na mapu'],
+  },
+  {
+    name: 'Rent-a-car',
+    price: 150,
+    features: ['Cijenovnik vozila', 'Galerija flote', 'WhatsApp / Booking link', 'Dodavanje na mapu (lokacija preuzimanja)'],
+  },
+  {
+    name: 'Trgovine (prodavnice, apoteke, pijace, butici, suveniri)',
+    price: 150,
+    features: ['Profil sa radnim vremenom', 'Galerija', 'Direktan kontakt / WhatsApp', 'Dodavanje na mapu'],
+  },
 ];
 
 const addons = [
@@ -97,13 +120,40 @@ const benefits = [
         <span class="eyebrow">Cjenovnik</span>
         <h2 class="section-title">Fiksna godišnja pretplata.<br /><em>Bez procenata.</em></h2>
         <p class="section-lead">
-          Birasi paket prema veličini objekta. Plaćaš jednom godišnje. Featured pozicija je dodatnih +150€.
+          Plaćaš jednom godišnje, direktno u banci. Bez provizije od rezervacija.
+          Premium pozicija (vrh kategorije + badge) je dodatnih <strong>+150€/god</strong>.
         </p>
       </header>
 
+      <h3 class="pricing-group-title">🏠 Smještaj <span>(cijena zavisi od veličine objekta)</span></h3>
       <div class="pricing-grid">
-        {tiers.map((t, i) => (
+        {smjestajTiers.map((t, i) => (
           <div class:list={['tier', { 'tier--featured': i === 1 }]}>
+            <div class="tier__name">{t.name}</div>
+            <div class="tier__price">
+              <strong>{t.price}€</strong>
+              <span class="tier__per">/ godišnje</span>
+            </div>
+            <ul class="tier__features">
+              {t.features.map((f) => (
+                <li>
+                  <span class="tier__check" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="pricing-group-title">🛒 Ostale kategorije <span>(jedinstvena cijena 150€/god)</span></h3>
+      <div class="pricing-grid">
+        {ostaleTiers.map((t) => (
+          <div class="tier">
             <div class="tier__name">{t.name}</div>
             <div class="tier__price">
               <strong>{t.price}€</strong>
@@ -269,6 +319,26 @@ const benefits = [
     font-style: italic;
     color: var(--c-accent);
   }
+  .pricing-group-title {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: var(--sp-12) 0 var(--sp-6);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--c-stone);
+  }
+  .pricing-group-title:first-of-type {
+    margin-top: var(--sp-8);
+  }
+  .pricing-group-title span {
+    font-family: var(--ff-sans);
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--c-muted);
+    font-style: italic;
+    margin-left: var(--sp-2);
+  }
   .pricing-grid {
     display: grid;
     gap: var(--sp-5);
@@ -278,7 +348,7 @@ const benefits = [
     .pricing-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (min-width: 1000px) {
-    .pricing-grid { grid-template-columns: repeat(3, 1fr); }
+    .pricing-grid { grid-template-columns: repeat(4, 1fr); }
   }
   .tier {
     background: var(--c-white);
