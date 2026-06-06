@@ -48,9 +48,39 @@ const COLLECTIONS: CollectionConfig[] = [
     fields: ['bio'],
     hasBody: false,
   },
+  // Listings are split into 5 separate collections (smjestaj, restorani,
+  // iskustva, rentacar, trgovina). Same shape — same translation contract.
   {
-    name: 'listings',
-    dir: 'src/content/listings',
+    name: 'smjestaj',
+    dir: 'src/content/smjestaj',
+    fields: ['title', 'excerpt'],
+    arrayFields: ['amenities'],
+    hasBody: true,
+  },
+  {
+    name: 'restorani',
+    dir: 'src/content/restorani',
+    fields: ['title', 'excerpt'],
+    arrayFields: ['amenities'],
+    hasBody: true,
+  },
+  {
+    name: 'iskustva',
+    dir: 'src/content/iskustva',
+    fields: ['title', 'excerpt'],
+    arrayFields: ['amenities'],
+    hasBody: true,
+  },
+  {
+    name: 'rentacar',
+    dir: 'src/content/rentacar',
+    fields: ['title', 'excerpt'],
+    arrayFields: ['amenities'],
+    hasBody: true,
+  },
+  {
+    name: 'trgovina',
+    dir: 'src/content/trgovina',
     fields: ['title', 'excerpt'],
     arrayFields: ['amenities'],
     hasBody: true,
@@ -78,6 +108,13 @@ function hashSource(payload: string): string {
 function listMarkdown(dir: string): string[] {
   const out: string[] = [];
   const abs = join(PROJECT_ROOT, dir);
+  // Tolerate empty / not-yet-created collections (e.g. trgovina before first
+  // CMS entry) — skip silently instead of crashing the build.
+  try {
+    statSync(abs);
+  } catch {
+    return out;
+  }
   for (const entry of readdirSync(abs)) {
     const full = join(abs, entry);
     if (statSync(full).isFile() && entry.endsWith('.md')) out.push(full);
