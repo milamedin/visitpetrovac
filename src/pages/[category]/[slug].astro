@@ -366,27 +366,10 @@ const breadcrumbLd = {
           </section>
         )}
 
-        {owner && (
+        {owner && owner.data.bio && (
           <section class="listing__section">
             <h2>{t('listing.section.host')}</h2>
-            <div class="owner-card">
-              {owner.data.photo ? (
-                <Picture src={owner.data.photo} alt={owner.data.name} class="owner-card__photo" loading="lazy" />
-              ) : (
-                <div class="owner-card__photo owner-card__photo--placeholder" aria-hidden="true">
-                  {owner.data.name.charAt(0)}
-                </div>
-              )}
-              <div class="owner-card__body">
-                <div class="owner-card__name">{owner.data.name}</div>
-                {owner.data.bio && <p class="owner-card__bio">{owner.data.bio}</p>}
-                {owner.data.languages.length > 0 && (
-                  <div class="owner-card__langs">
-                    {t('listing.host.speaks')}: {owner.data.languages.map((l) => l.toUpperCase()).join(' · ')}
-                  </div>
-                )}
-              </div>
-            </div>
+            <p class="owner-bio">{owner.data.bio}</p>
           </section>
         )}
 
@@ -415,6 +398,26 @@ const breadcrumbLd = {
       </div>
 
       <div class="listing__sidebar">
+        {owner && (
+          <div class="owner-header">
+            {owner.data.photo ? (
+              <Picture src={owner.data.photo} alt={owner.data.name} class="owner-header__photo" loading="lazy" />
+            ) : (
+              <div class="owner-header__photo owner-header__photo--placeholder" aria-hidden="true">
+                {owner.data.name.charAt(0)}
+              </div>
+            )}
+            <div class="owner-header__body">
+              <div class="owner-header__label">{t('listing.section.host')}</div>
+              <div class="owner-header__name">{owner.data.name}</div>
+              {owner.data.languages.length > 0 && (
+                <div class="owner-header__langs">
+                  {t('listing.host.speaks')}: {owner.data.languages.map((l) => l.toUpperCase()).join(' · ')}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {categorySlug === 'iskustva' ? (
           <TourBookingForm
             listingId={listing.id}
@@ -793,7 +796,63 @@ const breadcrumbLd = {
     flex-shrink: 0;
   }
 
-  /* Owner card */
+  /* Owner bio block inside main content */
+  .owner-bio {
+    line-height: 1.7;
+    color: var(--c-ink-soft);
+  }
+
+  /* Owner header — sits in sidebar above ContactReveal, visually one block */
+  .owner-header {
+    display: flex;
+    gap: var(--sp-4);
+    align-items: center;
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--c-cream-warm);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    border-bottom: 1px solid var(--c-stone);
+    margin-bottom: -1px;
+  }
+  :global(.owner-header__photo) {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .owner-header__photo--placeholder {
+    display: grid;
+    place-items: center;
+    background: var(--c-accent);
+    color: var(--c-cream);
+    font-family: var(--ff-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+  }
+  .owner-header__body {
+    min-width: 0;
+  }
+  .owner-header__label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--c-accent);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .owner-header__name {
+    font-family: var(--ff-serif);
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .owner-header__langs {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+  }
+
+  /* Owner card (legacy — kept in case used elsewhere) */
   .owner-card {
     display: flex;
     gap: var(--sp-5);
