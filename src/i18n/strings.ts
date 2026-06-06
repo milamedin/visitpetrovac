@@ -74,6 +74,7 @@ export type StringKey =
   | 'common.bookmark'
   | 'common.search.action'
   | 'common.skipToContent'
+  | 'common.country'
   | 'common.breadcrumbs.home'
   // Category page
   | 'cat.count.one'
@@ -215,6 +216,7 @@ const sr: StringMap = {
   'common.bookmark': 'Sačuvaj',
   'common.search.action': 'Pretraži',
   'common.skipToContent': 'Preskoči na sadržaj',
+  'common.country': 'Crna Gora',
   'common.breadcrumbs.home': 'Početna',
 
   'cat.count.one': 'objekat',
@@ -355,6 +357,7 @@ const en: Partial<StringMap> = {
   'common.bookmark': 'Save',
   'common.search.action': 'Search',
   'common.skipToContent': 'Skip to content',
+  'common.country': 'Montenegro',
   'common.breadcrumbs.home': 'Home',
 
   'cat.count.one': 'listing',
@@ -495,6 +498,7 @@ const ru: Partial<StringMap> = {
   'common.bookmark': 'Сохранить',
   'common.search.action': 'Найти',
   'common.skipToContent': 'Перейти к содержимому',
+  'common.country': 'Черногория',
   'common.breadcrumbs.home': 'Главная',
 
   'cat.count.one': 'объект',
@@ -635,6 +639,7 @@ const de: Partial<StringMap> = {
   'common.bookmark': 'Speichern',
   'common.search.action': 'Suchen',
   'common.skipToContent': 'Zum Inhalt',
+  'common.country': 'Montenegro',
   'common.breadcrumbs.home': 'Startseite',
 
   'cat.count.one': 'Objekt',
@@ -775,6 +780,7 @@ const fr: Partial<StringMap> = {
   'common.bookmark': 'Enregistrer',
   'common.search.action': 'Rechercher',
   'common.skipToContent': 'Aller au contenu',
+  'common.country': 'Monténégro',
   'common.breadcrumbs.home': 'Accueil',
 
   'cat.count.one': 'objet',

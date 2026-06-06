@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SubcategoryLanding from '../components/SubcategoryLanding.astro';
+import { getListingsByCategory } from '../lib/listings';
+
+const all = await getListingsByCategory('iskustva');
+const izleti = all.filter((l: any) =>
+  ['brod', 'kajak-sup'].includes(l.data.activity_type) && l.data.published !== false,
+);
+
+const intro = 'Izleti brodom iz Petrovca — do Svetog Stefana, Miločera, Lučica i okolnih ostrva. Plus sunset ture, kajak avanture i rent-a-boat. Sve što se može doživjeti na moru iz Petrovca.';
+
+const body = `
+<h2>Izleti brodom iz Petrovca</h2>
+<p>Petrovačka marina je polazište nekoliko klasičnih izleta — od poludnevnih tura do Svetog Stefana do cjelodnevnih ekskurzija u Kotorski zaliv. Sve ture polaze od Petrovca, sa različitim brodicima (manji glisser, srednji za grupu, klasični deplasman ribarski brod).</p>
+
+<h3>Najpopularniji izleti</h3>
+<ul>
+  <li><strong>Sveti Stefan + Miločer:</strong> 3—4h, polazi u 10h ili 14h, uključuje plivanje u skrivenim uvalama. Cijena 25—35€/osoba.</li>
+  <li><strong>Lučica plaža:</strong> 2h, brzi transport do skrivene pješčane plaže koja se ne može doći peške. 15—20€/osoba sa povratkom.</li>
+  <li><strong>Buljarica + ostrva:</strong> 3h, uključuje 2—3 mjesta za plivanje i obilazak ostrva Katič. 25€/osoba.</li>
+  <li><strong>Sunset tour:</strong> 2h, polazak u 18—19h zavisno od sezone. Šampanjac uključen. 30—40€/osoba.</li>
+  <li><strong>Cjelodnevni Bay tour:</strong> Petrovac → Budva → Bečići → Sveti Stefan → povratak. 7—8h, uključuje ručak. 50—70€.</li>
+</ul>
+
+<h2>Kajak i SUP avanture</h2>
+<p>Za one koji žele aktivniji izlet, kajak ture su odlične — naročito ka skrivenim plažama koje brodovi ne mogu da priđu (mali ulaz). Klasična kajak ruta je Petrovac → Lučica → Buljarica, oko 3h paddlinga + 1h plivanja. Vodiči su obavezni za prvi put.</p>
+
+<h2>Rent-a-boat (bez vodiča)</h2>
+<p>Ako imaš iskustvo u upravljanju brodicom (i potrebne dozvole za neke veličine), možeš da iznajmiš mali glisser ili gumeni brod sa motorom do 15 KS bez dozvole. Cijena 80—150€/dan. Veće brodice traže B kategoriju ili nautičku dozvolu.</p>
+
+<h2>Šta poneti</h2>
+<ul>
+  <li>Krema za sunčanje SPF 30+ (na moru je UV jači)</li>
+  <li>Šešir i naočare</li>
+  <li>Maska i peraja ako planiraš snorkeling (neki izleti uključuju, neki ne)</li>
+  <li>Vodu — bar 1L po osobi za poludnevni izlet</li>
+  <li>Vodootporna torba za telefon</li>
+  <li>Lagana jakna ili dukserica za sunset ture (uveče bude prohladno na vodi)</li>
+</ul>
+
+<h2>Najbolja sezona</h2>
+<p>Maj—oktobar. Najtoplije more je u avgustu (24—26°C). Najmirniji put je u junu i septembru. Kraj jula i avgust znaju biti gužva — rezerviši unaprijed.</p>
+
+<h2>Rezervacija</h2>
+<p>Većina ponuđača prima rezervacije isto dan ili dan ranije. Za peak sezonu (jul, avgust) rezerviši 2—3 dana unaprijed. Plaća se obično u gotovini, neki primaju i karticu. Sve ture u našem direktorijumu su provjereni lokalni ponuđači — radiš direktno sa njima, bez provizije.</p>
+
+<p>Tražiš nešto drugo? Vidi <a href="/iskustva">sva iskustva</a>, uključujući ronjenje, ribolov, gastro ture i kulturne ekskurzije.</p>
+`;
+---
+
+<BaseLayout
+  title="Izleti Petrovac — brodom, kajakom, do Sv. Stefana i Lučica | VisitPetrovac"
+  description="Izleti brodom iz Petrovca: do Svetog Stefana, Miločera, Lučica plaže, sunset ture, kajak avanture, rent-a-boat. Cijene, sezona, šta poneti, lokalni vodič."
+>
+  <SubcategoryLanding
+    eyebrow="Iskustva / Izleti"
+    title="Izleti iz Petrovca — brodom i kajakom"
+    intro={intro}
+    body={body}
+    listings={izleti}
+    parentLink={{ href: '/iskustva', label: 'Sva iskustva' }}
+    schemaType="TouristAttraction"
+  />
+</BaseLayout>

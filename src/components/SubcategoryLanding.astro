@@ -1,0 +1,213 @@
+---
+import ListingCard from './ListingCard.astro';
+import { useI18n } from '../i18n';
+import { applyTranslation } from '../lib/i18n-content';
+import type { AnyListing } from '../lib/listings';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  body: string;
+  listings: AnyListing[];
+  parentLink: { href: string; label: string };
+  schemaType: 'Restaurant' | 'BarOrPub' | 'TouristAttraction';
+}
+
+const { eyebrow, title, intro, body, listings, parentLink, schemaType } = Astro.props;
+const { t, locale, url } = useI18n(Astro);
+
+const items = listings
+  .map((l) => applyTranslation(l, locale))
+  .sort((a, b) => {
+    const ap = (a.data as any).premium ? 1 : 0;
+    const bp = (b.data as any).premium ? 1 : 0;
+    return bp - ap;
+  });
+
+const itemListLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  numberOfItems: items.length,
+  itemListElement: items.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': schemaType,
+      name: (item.data as any).title,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Petrovac na Moru',
+        addressRegion: 'Budva',
+        addressCountry: 'ME',
+      },
+      url: new URL(`/${(item as any).categorySlug || 'restorani'}/${item.id}`, Astro.site).toString(),
+    },
+  })),
+};
+---
+
+<Fragment slot="head">
+  <script type="application/ld+json" set:html={JSON.stringify(itemListLd)} />
+</Fragment>
+
+<section class="sublanding container">
+  <nav class="breadcrumbs" aria-label="Breadcrumbs">
+    <a href={url('/')}>{t('common.breadcrumbs.home')}</a>
+    <span aria-hidden="true">/</span>
+    <a href={url(parentLink.href)}>{parentLink.label}</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{title}</span>
+  </nav>
+
+  <header class="sublanding__header">
+    <span class="eyebrow">{eyebrow}</span>
+    <h1 class="sublanding__title">{title}</h1>
+    <p class="sublanding__intro">{intro}</p>
+  </header>
+
+  {items.length > 0 ? (
+    <div class="sublanding__grid">
+      {items.map((item) => (
+        <ListingCard
+          href={url(`/${(item as any).categorySlug || 'restorani'}/${item.id}`)}
+          title={(item.data as any).title}
+          excerpt={(item.data as any).excerpt}
+          image={(item.data as any).images?.[0]}
+          priceFrom={(item.data as any).price_from}
+          priceUnit={(item.data as any).price_unit}
+          rating={(item.data as any).rating}
+          premium={(item.data as any).premium}
+        />
+      ))}
+    </div>
+  ) : (
+    <p class="sublanding__empty">
+      Trenutno nema lokala u ovoj kategoriji. Vrati se kroz par dana ili pogledaj
+      <a href={url(parentLink.href)}>cijelu kategoriju {parentLink.label.toLowerCase()}</a>.
+    </p>
+  )}
+
+  <article class="sublanding__body" set:html={body} />
+
+  <aside class="sublanding__back">
+    Pogledaj sve: <a href={url(parentLink.href)}>{parentLink.label}</a>
+  </aside>
+</section>
+
+<style>
+  .sublanding {
+    padding-block: var(--sp-12) var(--sp-20);
+  }
+  .breadcrumbs {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+    margin-bottom: var(--sp-6);
+  }
+  .breadcrumbs a {
+    color: var(--c-muted);
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--c-accent);
+  }
+  .breadcrumbs span[aria-current] {
+    color: var(--c-ink);
+  }
+
+  .sublanding__header {
+    max-width: 68ch;
+    margin-bottom: var(--sp-12);
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--c-accent);
+    margin-bottom: var(--sp-3);
+    font-weight: 600;
+  }
+  .sublanding__title {
+    font-family: var(--ff-serif);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--sp-4);
+  }
+  .sublanding__intro {
+    font-size: var(--fs-lg);
+    line-height: 1.6;
+    color: var(--c-muted);
+    margin: 0;
+  }
+
+  .sublanding__grid {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: 1fr;
+    margin-bottom: var(--sp-16);
+  }
+  @media (min-width: 700px) {
+    .sublanding__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1100px) {
+    .sublanding__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .sublanding__empty {
+    margin-bottom: var(--sp-12);
+    padding: var(--sp-8);
+    background: var(--c-sand);
+    border-radius: var(--r-lg);
+    color: var(--c-muted);
+  }
+  .sublanding__empty a {
+    color: var(--c-accent-deep);
+    font-weight: 500;
+  }
+
+  .sublanding__body :global(h2) {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-top: var(--sp-12);
+    margin-bottom: var(--sp-4);
+  }
+  .sublanding__body :global(h3) {
+    font-family: var(--ff-serif);
+    font-size: 1.3rem;
+    margin-top: var(--sp-8);
+    margin-bottom: var(--sp-3);
+  }
+  .sublanding__body :global(p) {
+    line-height: 1.7;
+    margin-bottom: var(--sp-4);
+    max-width: 70ch;
+  }
+  .sublanding__body :global(ul) {
+    padding-left: 1.5em;
+    margin-bottom: var(--sp-4);
+    max-width: 70ch;
+  }
+  .sublanding__body :global(li) {
+    line-height: 1.7;
+    margin-bottom: var(--sp-2);
+  }
+  .sublanding__body :global(a) {
+    color: var(--c-accent-deep);
+    text-decoration: underline;
+    text-decoration-color: var(--c-stone);
+  }
+
+  .sublanding__back {
+    margin-top: var(--sp-12);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--c-stone);
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+  }
+  .sublanding__back a {
+    color: var(--c-accent-deep);
+    font-weight: 500;
+  }
+</style>

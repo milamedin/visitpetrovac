@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SubcategoryLanding from '../components/SubcategoryLanding.astro';
+import { getListingsByCategory } from '../lib/listings';
+
+const all = await getListingsByCategory('restorani');
+const kafici = all.filter((l: any) =>
+  ['bar', 'beach-bar'].includes(l.data.restaurant_type) && l.data.published !== false,
+);
+
+const intro = 'Kafići, beach barovi i cocktail barovi u Petrovcu — gdje na kafu jutro, gdje na koktel uz zalazak, gdje na piće uveče. Od porodičnih kafića u centru do najmodernijih beach barova.';
+
+const body = `
+<h2>Kafić kultura u Petrovcu</h2>
+<p>Kao i većina Crne Gore, Petrovac ima jaku kafić kulturu — ljudi ovdje provode sate uz kafu, gledaju more, pričaju sa komšijama. U sezoni se kafići pretvaraju u jutarnji i popodnevni hub turista i lokalaca, a uveče u barove sa koktelima i muzikom.</p>
+
+<h3>Tipovi kafića u Petrovcu</h3>
+<ul>
+  <li><strong>Centralni kafići:</strong> klasični "kafenisanje" — espresso, mljevena kafa, makijato. Cijena 1.50—2.50€</li>
+  <li><strong>Beach barovi:</strong> na samoj plaži, sa ležaljkama. Kokteli 6—12€, pivo 3—4€</li>
+  <li><strong>Cocktail barovi:</strong> uveče, sa muzikom i koktelima. Aperol Spritz 5—7€, posebni kokteli 8—15€</li>
+  <li><strong>Slastičarne:</strong> sa kafom i kolačima, više za ranopopodnevno opuštanje</li>
+</ul>
+
+<h2>Najbolji zalazak</h2>
+<p>Petrovac ima poseban geo-položaj — orijentisan ka jugozapadu, sa malim ostrvima ispred plaže (Katič i Sveta Nedjelja). Zalazak je drama svaki dan, naročito od jula do septembra. Većina beach barova ima happy hour 18—20h sa popustima na koktele. Ako tražiš najljepši pogled, biraj barove na zapadnom kraju glavne plaže.</p>
+
+<h2>Sezona i radno vrijeme</h2>
+<p>Većina centralnih kafića radi cijele godine. Beach barovi su otvoreni od maja do oktobra. Cocktail barovi u sezoni rade od jutra do 2—3 sata noću, van sezone samo do ponoći.</p>
+
+<h2>Wifi i radna mjesta</h2>
+<p>Skoro svi kafići u Petrovcu imaju besplatan WiFi. Ako tražiš mjesto za remote work, biraj centralne kafiće sa unutrašnjim sjedjenjem (tiše je nego beach barovi). Većina je u redu sa laptopom 2—3h za cijenu jedne kafe.</p>
+
+<h2>Lokalni savjeti</h2>
+<ul>
+  <li>Kava se uvijek poslužuje sa čašom vode — ako fali, slobodno traži.</li>
+  <li>Domaćoj kafi se kaže "turska" — ne "crna" niti "ekspres".</li>
+  <li>Niska cijena kafe = lokalni kafić (1.50€). Visoka cijena = turisti targetovan beach bar (4€).</li>
+  <li>U julu i avgustu nemoj očekivati instant slobodan sto u beach barovima u peak hours (17—21h).</li>
+</ul>
+
+<p>Tražiš nešto specifično? Pogledaj <a href="/restorani">sve restorane i kafiće</a> ili <a href="/iskustva">iskustva uz more</a>.</p>
+`;
+---
+
+<BaseLayout
+  title="Kafići Petrovac — beach barovi, cocktail barovi i kafane | VisitPetrovac"
+  description="Najbolji kafići, beach barovi i cocktail barovi u Petrovcu na Moru. Gdje na koktel uz zalazak, gdje na kafu, najbolji wifi za remote rad. Lokalni vodič."
+>
+  <SubcategoryLanding
+    eyebrow="Restorani / Kafići"
+    title="Kafići, beach barovi i cocktail barovi"
+    intro={intro}
+    body={body}
+    listings={kafici}
+    parentLink={{ href: '/restorani', label: 'Svi restorani i kafići' }}
+    schemaType="BarOrPub"
+  />
+</BaseLayout>

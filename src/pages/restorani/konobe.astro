@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SubcategoryLanding from '../../components/SubcategoryLanding.astro';
+import { getListingsByCategory } from '../../lib/listings';
+
+const all = await getListingsByCategory('restorani');
+const konobe = all.filter((l: any) => l.data.restaurant_type === 'konoba' && l.data.published !== false);
+
+const intro = 'Tradicionalne crnogorske konobe sa ribljim specijalitetima, domaćim vinom i njeguškim pršutom. Mjesta gdje lokalci večeraju kad žele autentičnu hranu, ne turističku.';
+
+const body = `
+<h2>Šta je crnogorska konoba</h2>
+<p>Konoba je tradicionalna gostionica — najčešće porodična, sa direktno nabavljenom ribom, doma rovskim mesom i lokalnim vinom iz susjednog vinograda. U Petrovcu i okolini ima nekoliko konoba koje rade desetljećima, od oca na sina. Cijena nije najjeftinija, ali je hrana svježa i tradicija očuvana.</p>
+
+<h3>Tipična ponuda</h3>
+<ul>
+  <li><strong>Riba:</strong> orada, brancin, kovač, list — pečeni na žaru, kuvani na "buzaru" stilu ili u soli</li>
+  <li><strong>Plodovi mora:</strong> hobotnica ispod sača (klasik!), škampi na buzaru, dagnje</li>
+  <li><strong>Predjelo:</strong> njeguški pršut, sir iz uljanika (lozovica), maslinke, paški sir</li>
+  <li><strong>Meso:</strong> jagnjetina ispod sača, teleća pljeskavica, šnicla na žaru</li>
+  <li><strong>Vino:</strong> vranac iz okoline Skadarskog jezera, krstač, plantažin</li>
+</ul>
+
+<h2>Cijene u konobama</h2>
+<p>Konobe nisu najjeftinije, ali ni preskupe. Realna večera za dvoje sa pićem: 35—70€. Riba je obično 30—50€/kg (živo), hobotnica 50—70€/kg pripremljena. Vino flašu od 15—40€ za domaću.</p>
+
+<h2>Konoba vs restoran</h2>
+<p>Glavna razlika: konoba ima tradicionalan ambijent (kamen, drvo, vinske bačve), porodičnu uslugu, i obično manje "fancy" prezentaciju ali bolji ukus. Restoran može biti modernije i raznovrsnije. Za autentičan crnogorski doživljaj — uvijek biraš konobu.</p>
+
+<h2>Buljarica i okolina</h2>
+<p>Najbolje konobe nisu uvijek u samom centru Petrovca — vrijedi se uputiti 2—3km do Buljarice ili Reževića. Tamo su konobe sa pogledom na more, mirnim ambijentom i tradicionalnijim ukusima. Idealno za večeru kad si već istražio centar Petrovca.</p>
+
+<p>Tražiš nešto drugo? Vidi <a href="/restorani/riblji">restorane sa naglaskom samo na ribu</a> ili <a href="/restorani/pizzerije">pizzerije u Petrovcu</a>.</p>
+`;
+---
+
+<BaseLayout
+  title="Konoba Petrovac — tradicionalne crnogorske konobe | VisitPetrovac"
+  description="Tradicionalne konobe u Petrovcu i okolini: njeguški pršut, hobotnica ispod sača, domaće vino. Lokalni vodič kroz autentičnu crnogorsku kuhinju."
+>
+  <SubcategoryLanding
+    eyebrow="Restorani / Konobe"
+    title="Konobe u Petrovcu"
+    intro={intro}
+    body={body}
+    listings={konobe}
+    parentLink={{ href: '/restorani', label: 'Svi restorani i kafići' }}
+    schemaType="Restaurant"
+  />
+</BaseLayout>

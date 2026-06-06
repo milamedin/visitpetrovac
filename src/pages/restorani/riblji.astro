@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SubcategoryLanding from '../../components/SubcategoryLanding.astro';
+import { getListingsByCategory } from '../../lib/listings';
+
+const all = await getListingsByCategory('restorani');
+// "Riblji" = konoba ili restoran sa amenities koji uključuju "riba" / "ribl" /
+// plodovi mora, plus naša glavna konoba varijanta.
+const riblji = all.filter((l: any) => {
+  if (l.data.published === false) return false;
+  const amenities = (l.data.amenities || []).join(' ').toLowerCase();
+  return amenities.includes('rib') || amenities.includes('plodov') ||
+    amenities.includes('hobotnic') || l.data.restaurant_type === 'konoba';
+});
+
+const intro = 'Riblji restorani i konobe u Petrovcu — svježa riba sa lokalnih brodića, hobotnica ispod sača, brancin na žaru. Sve što more da ima na meniju, od jednostavne sardele do kapitalca.';
+
+const body = `
+<h2>Gdje na ribu u Petrovcu</h2>
+<p>Petrovac je ribarsko selo koje se pretvorilo u turističko mjesto — što znači da i dalje ima nekoliko restorana sa direktnom nabavkom ribe sa malih brodića. Ako ti je na meniju "lov dana" — to znači da je riba uvedena toga jutra, a ne kupljena na pijaci u Baru.</p>
+
+<h3>Šta naručiti</h3>
+<ul>
+  <li><strong>Bela riba (orada, brancin):</strong> 30—45€/kg, najbolje na žaru sa kapljom maslinovog ulja i limuna</li>
+  <li><strong>Hobotnica:</strong> ili "ispod sača" (klasik, naručuje se sat ranije) ili na buzaru</li>
+  <li><strong>Lignje:</strong> punjene pršutom i sirom, ili klasično na žaru</li>
+  <li><strong>Riblja čorba:</strong> "brodet" — gusta čorba sa nekoliko vrsta ribe, idealno predjelo</li>
+  <li><strong>Sardele:</strong> jednostavno na žaru, jeftino i ukusno predjelo</li>
+  <li><strong>Buzara:</strong> škampi ili dagnje u sosu od vina, paradajza i bijelog luka</li>
+</ul>
+
+<h2>Kako prepoznati da je riba svježa</h2>
+<ul>
+  <li>Oči ribe su bistre, ne mutne</li>
+  <li>Škrge su crvene, ne braon</li>
+  <li>Telo je čvrsto na dodir</li>
+  <li>Miris je morski, ne "riblji"</li>
+</ul>
+<p>U dobrim restoranima ti pokazu ribu prije nego što je pripreme — slobodno traži.</p>
+
+<h2>Cijene i porcije</h2>
+<p>Bela riba se obično plaća po kilogramu (živo). Za dvoje ljudi dovoljna je riba od 600—800g. Hobotnica je skuplja (50—70€/kg pripremljena) ali je porcija manja jer se kuva gusto. Buzara od škampa za dvoje 35—45€.</p>
+
+<h2>Sezona i rezervacija</h2>
+<p>Najbolja sezona za ribu: maj—oktobar. U julu i avgustu uvijek rezerviši unaprijed, posebno za vikend. Riblji restorani u Buljarici su mirniji od onih u centru Petrovca.</p>
+
+<p>Više opcija u <a href="/restorani/konobe">crnogorskim konobama</a> ili <a href="/restorani">cijela kategorija restorana i kafića</a>.</p>
+`;
+---
+
+<BaseLayout
+  title="Riblji restoran Petrovac — svježa riba i plodovi mora | VisitPetrovac"
+  description="Riblji restorani u Petrovcu: svježa riba sa lokalnih brodića, hobotnica ispod sača, buzara, brodet. Lokalni vodič kroz najbolje restorane sa ribom."
+>
+  <SubcategoryLanding
+    eyebrow="Restorani / Riblji"
+    title="Riblji restorani u Petrovcu"
+    intro={intro}
+    body={body}
+    listings={riblji}
+    parentLink={{ href: '/restorani', label: 'Svi restorani i kafići' }}
+    schemaType="Restaurant"
+  />
+</BaseLayout>

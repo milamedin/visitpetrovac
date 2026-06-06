@@ -37,6 +37,12 @@ export const GET: APIRoute = async () => {
     { path: '/', changefreq: 'weekly', priority: 1.0, lastmod: today },
     { path: '/sve', changefreq: 'weekly', priority: 0.8, lastmod: today },
     { path: '/postani-partner', changefreq: 'monthly', priority: 0.5, lastmod: today },
+    // Subcategory landing pages (P3a — entity SEO targeting)
+    { path: '/restorani/pizzerije', changefreq: 'weekly', priority: 0.8, lastmod: today },
+    { path: '/restorani/konobe', changefreq: 'weekly', priority: 0.8, lastmod: today },
+    { path: '/restorani/riblji', changefreq: 'weekly', priority: 0.8, lastmod: today },
+    { path: '/kafici', changefreq: 'weekly', priority: 0.8, lastmod: today },
+    { path: '/izleti', changefreq: 'weekly', priority: 0.8, lastmod: today },
   ];
 
   const categories = await getCollection('categories');

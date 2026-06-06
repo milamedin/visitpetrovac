@@ -1,6 +1,6 @@
 ---
 name: Marko Perović
-email: marko@example.com
+email: ''
 phone: +382 68 062 259
 whatsapp: '+38268062259'
 photo: ''

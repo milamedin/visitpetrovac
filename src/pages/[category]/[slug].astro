@@ -64,20 +64,61 @@ const schemaTypeMap: Record<string, string> = {
 };
 const schemaType = schemaTypeMap[categorySlug] ?? 'LocalBusiness';
 
+// ─── LocalBusiness / structured data ──────────────────────────
+// Every entity needs at minimum: name, image, address. Fallbacks ensure
+// the JSON-LD always validates against schema.org even for thin listings.
+const fallbackImage = new URL(ogImage, Astro.site).toString();
+const imageList =
+  data.images && data.images.length > 0
+    ? data.images.map((p) => new URL(p, Astro.site).toString())
+    : [fallbackImage];
+
+const canonicalUrl = new URL(`/${categorySlug}/${slug}`, Astro.site).toString();
+
+// Map €/€€/€€€ from price_from for human-readable priceRange
+const priceRangeBucket = data.price_from
+  ? data.price_from < 30
+    ? '€'
+    : data.price_from < 80
+      ? '€€'
+      : data.price_from < 150
+        ? '€€€'
+        : '€€€€'
+  : '€€';
+
+// TouristAttraction does NOT accept offers/priceRange — skip those fields.
+const isTouristAttraction = schemaType === 'TouristAttraction';
+
+// Restaurant-specific: derive servesCuisine from restaurant_type if present
+const cuisineMap: Record<string, string> = {
+  konoba: 'Montenegrin',
+  restoran: 'Mediterranean',
+  pizzeria: 'Italian',
+  slasticarna: 'Desserts',
+  bar: 'Bar',
+  'beach-bar': 'Bar',
+};
+const servesCuisine =
+  schemaType === 'Restaurant' && (data as any).restaurant_type
+    ? cuisineMap[(data as any).restaurant_type] || 'Mediterranean'
+    : undefined;
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': schemaType,
+  '@id': canonicalUrl,
   name: data.title,
   description: data.excerpt,
-  image: data.images.map((p) => new URL(p, Astro.site).toString()),
-  ...(data.location?.address && {
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: data.location.address,
-      addressLocality: 'Petrovac',
-      addressCountry: 'ME',
-    },
-  }),
+  url: canonicalUrl,
+  image: imageList,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: data.location?.address || 'Petrovac na Moru',
+    addressLocality: 'Petrovac na Moru',
+    addressRegion: 'Budva',
+    postalCode: '85300',
+    addressCountry: 'ME',
+  },
   ...(data.location?.lat &&
     data.location?.lng && {
       geo: {
@@ -88,16 +129,28 @@ const jsonLd = {
     }),
   ...(contactPhone && { telephone: contactPhone }),
   ...(contactEmail && { email: contactEmail }),
-  ...(contactWebsite && { url: contactWebsite }),
-  ...(data.price_from && {
-    priceRange: `€${data.price_from}+`,
-    offers: {
-      '@type': 'Offer',
-      price: data.price_from,
-      priceCurrency: 'EUR',
-      availability: 'https://schema.org/InStock',
-    },
-  }),
+  ...(servesCuisine && { servesCuisine }),
+  ...(!isTouristAttraction && { priceRange: priceRangeBucket }),
+  ...(!isTouristAttraction &&
+    data.price_from && {
+      offers: {
+        '@type': 'Offer',
+        price: data.price_from,
+        priceCurrency: 'EUR',
+        availability: 'https://schema.org/InStock',
+        url: canonicalUrl,
+      },
+    }),
+  ...(data.rating !== undefined &&
+    data.rating > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: data.rating,
+        bestRating: 5,
+        worstRating: 0,
+        reviewCount: 1,
+      },
+    }),
 };
 
 const breadcrumbLd = {
@@ -127,7 +180,7 @@ const breadcrumbLd = {
 
 <BaseLayout
   title={`${data.title} | VisitPetrovac`}
-  description={`${data.excerpt} — ${category.data.name} u Petrovcu na Moru.`}
+  description={`${data.excerpt} — ${category.data.name}, Petrovac na Moru, ${t('common.country')}.`}
   ogImage={ogImage}
 >
   <Fragment slot="head">

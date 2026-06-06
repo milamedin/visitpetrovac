@@ -4,7 +4,7 @@ export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = 'sr';
 
 export const localeMeta: Record<Locale, { name: string; nativeName: string; displayCode: string; flag: string; htmlLang: string; ogLocale: string }> = {
-  sr: { name: 'Montenegrin', nativeName: 'Crnogorski', displayCode: 'ME', flag: '🇲🇪', htmlLang: 'sr', ogLocale: 'sr_ME' },
+  sr: { name: 'Montenegrin', nativeName: 'Crnogorski', displayCode: 'ME', flag: '🇲🇪', htmlLang: 'sr-Latn-ME', ogLocale: 'sr_ME' },
   en: { name: 'English', nativeName: 'English', displayCode: 'EN', flag: '🇬🇧', htmlLang: 'en', ogLocale: 'en_US' },
   ru: { name: 'Russian', nativeName: 'Русский', displayCode: 'RU', flag: '🇷🇺', htmlLang: 'ru', ogLocale: 'ru_RU' },
   de: { name: 'German', nativeName: 'Deutsch', displayCode: 'DE', flag: '🇩🇪', htmlLang: 'de', ogLocale: 'de_DE' },

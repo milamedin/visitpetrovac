@@ -2,6 +2,14 @@ import { defineMiddleware } from 'astro:middleware';
 import { parseLocaleFromPath, defaultLocale } from './i18n/locales';
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  // Force apex domain — www.visitpetrovac.com → visitpetrovac.com (301).
+  // Fixes the 5xx on the www subdomain reported by Site Audit.
+  const host = context.request.headers.get('host') || '';
+  if (host.startsWith('www.')) {
+    const apex = `https://${host.slice(4)}${context.url.pathname}${context.url.search}`;
+    return Response.redirect(apex, 301);
+  }
+
   // Skip if already resolved (a previous middleware pass set it before rewrite).
   if (!context.locals.locale) {
     const { locale, pathWithoutLocale } = parseLocaleFromPath(context.url.pathname);

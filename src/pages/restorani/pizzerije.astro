@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SubcategoryLanding from '../../components/SubcategoryLanding.astro';
+import { getListingsByCategory } from '../../lib/listings';
+
+const all = await getListingsByCategory('restorani');
+const pizzerije = all.filter((l: any) => l.data.restaurant_type === 'pizzeria' && l.data.published !== false);
+
+const intro = 'Klasične italijanske pice iz krušne peći, brza dostava i mjesta za sjedjeti u centru. Najbolje pizzerije u Petrovcu — od porodičnih konobica do beach pizza bara.';
+
+const body = `
+<h2>Gdje na piztzu u Petrovcu</h2>
+<p>Petrovac na Moru ima nekoliko proverenih pizzerija — od tradicionalnih sa krušnim pećima do brzih za sezonu kad je gužva. Većina radi cijele godine, sa proširenim radnim vremenom u julu i avgustu (otvoreno do ponoći ili kasnije).</p>
+
+<h3>Šta očekivati</h3>
+<ul>
+  <li><strong>Cijena:</strong> klasična Margherita 6—9€, specijalne pice 9—15€</li>
+  <li><strong>Dostava:</strong> većina pizzerija dostavlja apartmane u Petrovcu i bližoj okolini (Buljarica, Reževići). Cijena dostave 2—3€, minimum porudžbina 15€.</li>
+  <li><strong>Brzina:</strong> u peak sezoni (jul–avgust) sačekaj 30—45 min za dostavu, 15—25 min za sjesti.</li>
+  <li><strong>Tijesto:</strong> većina koristi 24—48h fermentisano tijesto. Ako tražiš autentičnu napolitansku pizzu, pitaj prije porudžbine.</li>
+</ul>
+
+<h2>Pizza u Buljarici i Reževićima</h2>
+<p>Mali porodični restorani u okolnim selima takođe imaju pizze, često sa pogledom na more i mirnijim ambijentom nego centar Petrovca. Posebno korisno ako odsjedaš u apartmanu van centra — ne treba ti auto.</p>
+
+<h2>Bezglutenske i veganske opcije</h2>
+<p>Sve više pizzerija u Petrovcu nudi bezglutensko tijesto (zatraži unaprijed) i veganske opcije sa biljnim sirom. Tradicionalne crnogorske pice obično imaju njeguški pršut ili kajmak — za vegane traži posebno.</p>
+
+<h2>Savjeti lokalca</h2>
+<ul>
+  <li>U julu i avgustu rezerviši sto za večeru ili dođi prije 19h.</li>
+  <li>Prijatno za porodice — sve pizzerije imaju dječje porcije.</li>
+  <li>Za grupu od 6+ ljudi, obavezno najavi unaprijed.</li>
+</ul>
+
+<p>Tražiš nešto drugo iz crnogorske kuhinje? Pogledaj <a href="/restorani/konobe">konobe sa ribljim specijalitetima</a> ili <a href="/restorani/riblji">restorane orijentisane samo na ribu</a>.</p>
+`;
+---
+
+<BaseLayout
+  title="Pizzeria Petrovac — najbolje pizzerije i dostava | VisitPetrovac"
+  description="Pizzerije u Petrovcu na Moru: gdje na pizu, koje dostavljaju u apartman, cijene i radno vrijeme. Lokalni vodič kroz najbolje italijanske, napolitanske i klasične pizzerije."
+>
+  <SubcategoryLanding
+    eyebrow="Restorani / Pizzerije"
+    title="Pizzerije u Petrovcu"
+    intro={intro}
+    body={body}
+    listings={pizzerije}
+    parentLink={{ href: '/restorani', label: 'Svi restorani i kafići' }}
+    schemaType="Restaurant"
+  />
+</BaseLayout>
