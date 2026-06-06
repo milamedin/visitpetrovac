@@ -12,7 +12,7 @@ translations:
     title: Kontakt
   fr:
     title: Contact
-source_hash: 902390c24bdedaca
+source_hash: ''
 body_translations:
   en: >
 
@@ -136,10 +136,29 @@ body_translations:
 
 **Instagram:** [@visitpetrovac](https://instagram.com/visitpetrovac)
 
+Sjedište uredništva je u Petrovcu na Moru, Crna Gora. Vremenska zona Central European Time (UTC+1, ljetos UTC+2). Pišemo na crnogorskom/srpskom, engleskom, ruskom, njemačkom i francuskom — u kom god jeziku se obratiš, na istom dobiješ odgovor.
+
+## Kad ti odgovaramo
+
+Tokom radne sedmice (ponedjeljak—petak) odgovaramo u roku od **1—2 sata** u radnom vremenu (08—22h CET). Vikendom i praznikom isti dan, ali sa malim kašnjenjem. Najbrži odgovor je preko **WhatsApp-a**, pa onda email. Instagram DM proverava se 1—2 puta dnevno.
+
 ## Ako si vlasnik objekta
 
-Ako želiš da objaviš svoj apartman, restoran ili izlet — pogledaj [Postani partner](/postani-partner). Tu su sve informacije i cjenovnik.
+Ako želiš da objaviš svoj apartman, restoran, rent-a-car servis, izlet ili trgovinu — pogledaj stranicu [Postani partner](/postani-partner). Tu su detalji o cjenovniku (od 100€ do 600€ godišnje, zavisno od kategorije i veličine), šta sve dobijaš, kako se prijavljuješ, i kako izgleda proces od prijave do objave (obično 2—3 dana). Naša cijena uključuje cjelogodišnju vidljivost, profesionalni profil sa galerijom, direktan kontakt sa gostima bez provizije, i dodavanje na Google mapu.
+
+Imaš pitanja prije nego što se prijaviš? Slobodno nas kontaktiraj — bez obaveze. Pomažemo i sa savjetima oko fotografisanja, opisa objekta i postavljanja cijene tako da bude konkurentna.
 
 ## Ako si gost
 
-Ako imaš pitanje o nekom listingu ili ne možeš da kontaktiraš vlasnika — javi nam i pomoći ćemo. Odgovaramo isti dan, najčešće za sat-dva.
+Ako imaš pitanje o nekom listingu, ne možeš da dođeš do vlasnika, ili samo tražiš savjet šta gdje u Petrovcu — slobodno se javi. **Mi nismo agencija** i ne posredujemo u rezervacijama, ali znamo lokalce, znamo objekte, i pomoći ćemo da dobiješ pravu informaciju.
+
+Najčešća pitanja:
+
+- **Kako rezervišem apartman?** — direktno kod vlasnika, preko broja telefona ili WhatsApp-a koji vidiš na listingu. Mi ne uzimamo proviziju.
+- **Da li mogu da dobijem fakturu?** — vlasnik ti može izdati ugovor i račun ako traži. Pitaj prije dolaska.
+- **Šta ako objekat nije kao na slici?** — javi nam odmah, pomoći ćemo. Sve listinge proveravamo prije objave.
+- **Kako platim?** — gotovinom u Petrovcu (€), karticom ako vlasnik ima POS, ili preko bankarskog naloga uz predračun. Sve dogovaraš direktno sa domaćinom.
+
+## Privatnost
+
+Sve poruke koje nam šalješ tretiramo povjerljivo. Ne dijelimo email adrese sa trećim stranama. Više o tome u [Politici privatnosti](/info/privatnost).

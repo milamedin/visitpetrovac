@@ -73,7 +73,9 @@ const imageList =
     ? data.images.map((p) => new URL(p, Astro.site).toString())
     : [fallbackImage];
 
-const canonicalUrl = new URL(`/${categorySlug}/${slug}`, Astro.site).toString();
+// Localized canonical URL — use url() helper to include /en/, /de/, etc. prefix
+// so each locale variant has its own @id in structured data.
+const canonicalUrl = new URL(url(`/${categorySlug}/${slug}`), Astro.site).toString();
 
 // Map €/€€/€€€ from price_from for human-readable priceRange
 const priceRangeBucket = data.price_from

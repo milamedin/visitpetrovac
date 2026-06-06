@@ -8,6 +8,8 @@ import Picture from '../components/Picture.astro';
 import { useI18n } from '../i18n';
 import { applyTranslation } from '../lib/i18n-content';
 import { getListingsByCategory, collectionFor } from '../lib/listings';
+import { renderLocalizedBody } from '../lib/i18n-content';
+import { render } from 'astro:content';
 
 export const prerender = false;
 
@@ -20,6 +22,10 @@ if (!slug || !collectionFor(slug)) return Astro.redirect(url('/404'));
 const categoryRaw = await getEntry('categories', slug);
 if (!categoryRaw) return Astro.redirect(url('/404'));
 const category = applyTranslation(categoryRaw, locale);
+
+// Localized body for the category page (longer SEO text under the listings).
+const categoryBodyHtml = renderLocalizedBody(categoryRaw, locale);
+const { Content: CategoryContent } = await render(categoryRaw);
 
 const allCategories = (await getCollection('categories'))
   .map((c) => applyTranslation(c, locale))
@@ -326,9 +332,60 @@ const heroImage = category.data.hero_image ?? '/hero-petrovac.jpg';
       </div>
     </div>
   </section>
+
+  <section class="cat-body container">
+    <article class="cat-body__article">
+      {categoryBodyHtml ? (
+        <div set:html={categoryBodyHtml} />
+      ) : (
+        <CategoryContent />
+      )}
+    </article>
+  </section>
 </BaseLayout>
 
 <style>
+  .cat-body {
+    padding: var(--sp-12) 0 var(--sp-20);
+  }
+  .cat-body__article {
+    max-width: 70ch;
+    margin-inline: auto;
+  }
+  .cat-body__article :global(h2) {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-top: var(--sp-10);
+    margin-bottom: var(--sp-4);
+    letter-spacing: -0.01em;
+  }
+  .cat-body__article :global(h3) {
+    font-family: var(--ff-serif);
+    font-size: 1.3rem;
+    margin-top: var(--sp-6);
+    margin-bottom: var(--sp-3);
+  }
+  .cat-body__article :global(p) {
+    line-height: 1.7;
+    margin-bottom: var(--sp-4);
+  }
+  .cat-body__article :global(ul),
+  .cat-body__article :global(ol) {
+    padding-left: 1.5em;
+    margin-bottom: var(--sp-4);
+  }
+  .cat-body__article :global(li) {
+    line-height: 1.7;
+    margin-bottom: var(--sp-2);
+  }
+  .cat-body__article :global(a) {
+    color: var(--c-accent-deep);
+    text-decoration: underline;
+    text-decoration-color: var(--c-stone);
+  }
+  .cat-body__article :global(a:hover) {
+    text-decoration-color: var(--c-accent);
+  }
   .cat-hero {
     position: relative;
     color: var(--c-cream);
