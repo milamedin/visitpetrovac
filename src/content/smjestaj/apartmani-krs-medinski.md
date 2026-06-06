@@ -1,13 +1,27 @@
 ---
 title: Apartmani Krš Medinski
 owner: ilija-medin
-excerpt: ....
+excerpt: |-
+  Apartman Krš Medinski POTKROVLJE nalazi se u Petrovcu na Moru, na uzvišenju Krš Medinski (jedan od najstarijih djelova grada poviše antičkih mozaika), u mirnoj i zelenoj zoni.
+
+  Smješten je u porodičnoj kući, okruženoj zelenilom i velikom baštom. Nalazi se na najvišoj etaži objekta, što čini da ima jedan od naljepših pogleda na petrovački zaliv, more i dva ostrva.
+
+  Objekat posjeduje besplatan parking prostor, teren za sport i rekreaciju, kao i roštilj. Svim gostima omogućena je besplatna upotreba veš mašine.
+
+  Apartman posjeduje dvije prostorane sobe (dnevnu i spavaću), kupatilo s kadom, veću terasu s pogledom na more, kao i balkon. U okviru dnevne sobe su kuhinja i trpezarija, te kauč koji se može pretvoriti u ležaj za dvoje.
+
+  U spavaćoj sobi se nalazi francuski ležaj i krevet za 1 osobu.
+
+  Smještaj ima WiFi internet, TV s kablovskom televizijom, klima uređaj, peglu s daskom za peglanje, fen, toster i kuvalo.
+
+  Udaljen je od centra grada i plaže 10-ak min hoda, odnosno 3-4 min automobilom.
 accommodation_type: kuca
 price_from: null
 price_unit: per_night
 capacity: null
 neighborhood: krs-medinski
-amenities: []
+amenities:
+  - WiFi, Parking, Klima, Igralište
 images:
   - /uploads/316.jpg
 units:
@@ -22,14 +36,14 @@ units:
     description: ''
     image: /uploads/listings/demo-buljarica.jpg
 location:
-  address: ''
-  lat: null
-  lng: null
+  address: Krš Medinski
+  lat: 42.20966
+  lng: 18.93974
 rating: null
 booking_url: ''
 youtube_url: ''
 website: ''
-premium: false
+premium: true
 created_at: 2026-06-06
 published: true
 ---
