@@ -8,7 +8,10 @@ price_unit: per_night
 capacity: null
 neighborhood: krs-medinski
 amenities:
-  - WiFi, Parking, Klima, Igralište
+  - WiFi
+  - Parking
+  - Klima
+  - Igralište
 images:
   - /uploads/316.jpg
 units:
