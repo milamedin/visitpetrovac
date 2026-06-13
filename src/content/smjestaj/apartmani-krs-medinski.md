@@ -48,7 +48,7 @@ units:
     description: Jednosoban apartman sa terasom i pogledom na more
     image: /uploads/listings/Screenshot 2026-06-13 at 18.12.22.png
 location:
-  address: Krš Medinski
+  address: XIX ulica, broj 41, 85300 Petrovac na Moru
   lat: 42.20966
   lng: 18.93974
 rating: 4.8
