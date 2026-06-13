@@ -41,9 +41,51 @@
         color: rgba(7, 59, 76, 0.6);
         margin-top: 0.5rem;
       }
+
+      /* Build/deploy status banner — pinned to the top of the admin so Mila
+         immediately sees if the last save failed to publish on the live site. */
+      .build-status {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10000;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        text-align: center;
+        font-weight: 500;
+        transition: background 0.2s;
+        pointer-events: auto;
+      }
+      .build-status a {
+        color: inherit;
+        text-decoration: underline;
+        font-weight: 600;
+      }
+      .build-status--success {
+        background: #d1f5e0;
+        color: #0a5d2d;
+      }
+      .build-status--failure {
+        background: #fde0e0;
+        color: #8a1f1f;
+      }
+      .build-status--pending {
+        background: #fff3c4;
+        color: #7a5a00;
+      }
+      .build-status--hidden {
+        display: none;
+      }
+      /* Push Sveltia's main UI below the banner */
+      body[data-build-status] {
+        padding-top: 36px;
+      }
     </style>
   </head>
   <body>
+    <div class="build-status build-status--hidden" id="build-status"></div>
+
     <div class="splash" id="splash">
       <div>
         <div class="splash__logo">visit<em>petrovac</em></div>
@@ -62,6 +104,61 @@
           if (s) s.style.display = 'none';
         }, 1500);
       });
+
+      // ─── Build status banner ──────────────────────────────────────────
+      // Polls GitHub's commit status API every 60s to surface whether the
+      // latest save actually deployed to the live site. Cloudflare reports
+      // back to GitHub on every push with success/failure — we read that.
+      async function checkBuildStatus() {
+        const banner = document.getElementById('build-status');
+        if (!banner) return;
+        try {
+          const res = await fetch(
+            'https://api.github.com/repos/milamedin/visitpetrovac/commits/main/status',
+            { cache: 'no-store' },
+          );
+          if (!res.ok) return;
+          const data = await res.json();
+          const state = data.state; // success | failure | pending | error
+          const sha = (data.sha || '').slice(0, 7);
+          const msg = data.statuses?.[0]?.description || '';
+
+          banner.classList.remove(
+            'build-status--success',
+            'build-status--failure',
+            'build-status--pending',
+            'build-status--hidden',
+          );
+          document.body.setAttribute('data-build-status', state);
+
+          if (state === 'success') {
+            banner.classList.add('build-status--success');
+            banner.innerHTML = '✓ Sajt je objavljen — sve sačuvane izmjene su žive na visitpetrovac.com';
+          } else if (state === 'pending') {
+            banner.classList.add('build-status--pending');
+            banner.innerHTML =
+              '⏳ Build u toku — izmjene će biti vidljive na sajtu za 1—2 min. Osvježi ovu stranicu da provjeriš.';
+          } else if (state === 'failure' || state === 'error') {
+            banner.classList.add('build-status--failure');
+            banner.innerHTML =
+              '⚠ Posljednji build je pao — sajt prikazuje staru verziju. ' +
+              'Posljednje izmjene nisu žive. ' +
+              `<a href="https://github.com/milamedin/visitpetrovac/commit/${sha}" target="_blank" rel="noopener">Vidi commit ${sha}</a> ` +
+              '— najčešći razlog: tekst iznad limita ili neispravno polje. Javi developeru ako se ne riješi samo.';
+          } else {
+            // No status yet (fresh repo) — hide silently
+            banner.classList.add('build-status--hidden');
+            document.body.removeAttribute('data-build-status');
+          }
+        } catch (err) {
+          // Network/CORS errors — fail quietly so Sveltia keeps working
+          console.warn('[build-status]', err);
+        }
+      }
+
+      // Initial check + poll every minute
+      checkBuildStatus();
+      setInterval(checkBuildStatus, 60000);
     </script>
   </body>
 </html>
