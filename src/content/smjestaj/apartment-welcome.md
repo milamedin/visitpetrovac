@@ -1,5 +1,5 @@
 ---
-title: Apartment Welcome
+title: Apartman Welcome
 owner: ilija-medin
 excerpt: Moderan jednosoban apartman s 2 kupatila, velikom terasom s pogledom na more. Garaža, WiFi, klima. 10 min od plaže.
 accommodation_type: ''
