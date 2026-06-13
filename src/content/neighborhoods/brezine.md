@@ -1,5 +1,5 @@
 ---
-name: Brezine
-description: Mirno naselje na brdu iznad Petrovca, panoramski pogledi na rivijeru.
+name: Brežine
+description: Mirno naselje između dvije plaže Petrovca.
 order: 2
 ---
