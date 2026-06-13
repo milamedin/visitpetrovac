@@ -1,9 +1,7 @@
 ---
 title: Local Rent a Car Agency
 owner: ''
-excerpt: |-
-  Najveća ponuda rent-a-car vozila na jednom mjestu. Uporedite cijene od provjerenih lokalnih agencija i uštedite do 30%.
-  https://rentakar.me/
+excerpt: Najveća ponuda rent-a-car vozila na jednom mjestu. Uporedite cijene od provjerenih lokalnih agencija i uštedite.
 price_from: 24
 price_unit: per_day
 neighborhood: ''
