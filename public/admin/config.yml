@@ -43,7 +43,7 @@ collections:
         value_field: "{{slug}}"
         display_fields: ["name"]
         required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['^[\s\S]{1,200}$', 'Predug — maksimalno 200 znakova. Skrati prije nego što sačuvaš.'] }
       - name: "accommodation_type"
         label: "Tip smještaja"
         widget: "select"
@@ -129,7 +129,7 @@ collections:
         value_field: "{{slug}}"
         display_fields: ["name"]
         required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['^[\s\S]{1,200}$', 'Predug — maksimalno 200 znakova. Skrati prije nego što sačuvaš.'] }
       - name: "restaurant_type"
         label: "Tip restorana"
         widget: "select"
@@ -211,7 +211,7 @@ collections:
         value_field: "{{slug}}"
         display_fields: ["name"]
         required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['^[\s\S]{1,200}$', 'Predug — maksimalno 200 znakova. Skrati prije nego što sačuvaš.'] }
       - name: "activity_type"
         label: "Tip iskustva"
         widget: "select"
@@ -280,7 +280,7 @@ collections:
         value_field: "{{slug}}"
         display_fields: ["name"]
         required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['^[\s\S]{1,200}$', 'Predug — maksimalno 200 znakova. Skrati prije nego što sačuvaš.'] }
       - { name: "price_from", label: "Najjeftinija cijena (€/dan)", widget: "number", required: false, value_type: "int", min: 0 }
       - name: "price_unit"
         label: "Jedinica cijene"
@@ -341,7 +341,7 @@ collections:
         value_field: "{{slug}}"
         display_fields: ["name"]
         required: false
-      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['.{1,200}', 'Maksimalno 200 znakova'] }
+      - { name: "excerpt", label: "Kratak opis (max 200 znakova)", widget: "text", pattern: ['^[\s\S]{1,200}$', 'Predug — maksimalno 200 znakova. Skrati prije nego što sačuvaš.'] }
       - name: "shop_type"
         label: "Tip trgovine"
         widget: "select"
@@ -465,7 +465,7 @@ collections:
     sortable_fields: ['published_at', 'title']
     fields:
       - { name: "title", label: "Naslov", widget: "string" }
-      - { name: "excerpt", label: "Uvod (max 300 znakova)", widget: "text", pattern: ['.{1,300}', 'Maksimalno 300 znakova'] }
+      - { name: "excerpt", label: "Uvod (max 300 znakova)", widget: "text", pattern: ['^[\s\S]{1,300}$', 'Predug — maksimalno 300 znakova. Skrati prije nego što sačuvaš.'] }
       - { name: "cover_image", label: "Naslovna fotografija", widget: "image", required: false, media_folder: "/public/uploads/posts", public_folder: "/uploads/posts" }
       - { name: "published_at", label: "Datum objave", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
       - { name: "author", label: "Autor", widget: "string", default: "VisitPetrovac" }
