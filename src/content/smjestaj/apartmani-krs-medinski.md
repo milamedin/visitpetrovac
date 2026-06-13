@@ -1,17 +1,20 @@
 ---
 title: Apartmani Krš Medinski
 owner: ilija-medin
-excerpt: Apartman u porodičnoj kući na uzvišenju Krš Medinski — pogled na petrovački zaliv i dva ostrva. Velika bašta, roštilj, parking. 10 min hoda do plaže.
+excerpt: Apartman u porodičnoj kući na uzvišenju Krš Medinski, pogled na cijeli grad i ostrva Katič i Sv. Nedjelja. Velika bašta, roštilj, igralište, parking. 10 min hoda do plaže.
 accommodation_type: kuca
 price_from: null
 price_unit: per_night
 capacity: null
 neighborhood: krs-medinski
 amenities:
+  - Pogled na more
   - WiFi
   - Parking
   - Klima
   - Igralište
+  - Terasa
+  - Masline
 images:
   - /uploads/316.jpg
 units:
