@@ -17,6 +17,10 @@ amenities:
   - Masline
 images:
   - /uploads/Screenshot 2026-06-13 at 18.08.09.png
+  - /uploads/Screenshot 2026-06-13 at 18.10.29.png
+  - /uploads/Screenshot 2026-06-13 at 18.10.38.png
+  - /uploads/Screenshot 2026-06-13 at 18.09.50.png
+  - /uploads/Screenshot 2026-06-13 at 18.09.23.png
 units:
   - name: Apartman potkrovlje
     capacity: 5
