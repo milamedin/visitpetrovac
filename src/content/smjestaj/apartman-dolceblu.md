@@ -1,6 +1,6 @@
 ---
 title: Apartman DolceBlu
-owner: ''
+owner: nikolina-stanić
 excerpt: Apartman se nalazi na idealnog lokaciji u Petrovcu, izmedju dvije plaže. Kompletno opremljen apartman sa privatnim parkingom, idealan je za vaš odmor.
 accommodation_type: apartman
 price_from: null
