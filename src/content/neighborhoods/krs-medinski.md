@@ -1,5 +1,5 @@
 ---
 name: Krš Medinski
-description: Stari dio Petrovca — kameni krš iznad starog grada, autentični kameni objekti.
+description: Stari dio Petrovca, uzvišenje sa pogledom na cijeli grad.
 order: 5
 ---
