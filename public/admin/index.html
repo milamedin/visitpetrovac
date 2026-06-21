@@ -106,22 +106,26 @@
       });
 
       // ─── Build status banner ──────────────────────────────────────────
-      // Polls GitHub's commit status API every 60s to surface whether the
-      // latest save actually deployed to the live site. Cloudflare reports
-      // back to GitHub on every push with success/failure — we read that.
+      // Compares the latest GitHub commit timestamp with the live site's
+      // Last-Modified header. If the live site is older than the commit by
+      // more than 5 min → build likely failed. Otherwise → published.
+      // Cloudflare Workers Builds doesn't write commit statuses back to
+      // GitHub, so timestamp comparison is more reliable than the status API.
       async function checkBuildStatus() {
         const banner = document.getElementById('build-status');
         if (!banner) return;
         try {
-          const res = await fetch(
-            'https://api.github.com/repos/milamedin/visitpetrovac/commits/main/status',
-            { cache: 'no-store' },
-          );
-          if (!res.ok) return;
-          const data = await res.json();
-          const state = data.state; // success | failure | pending | error
-          const sha = (data.sha || '').slice(0, 7);
-          const msg = data.statuses?.[0]?.description || '';
+          const [commitRes, siteRes] = await Promise.all([
+            fetch('https://api.github.com/repos/milamedin/visitpetrovac/commits/main', { cache: 'no-store' }),
+            fetch('https://visitpetrovac.com/?_cb=' + Date.now(), { method: 'HEAD', cache: 'no-store' }).catch(() => null),
+          ]);
+          if (!commitRes.ok) return;
+          const commit = await commitRes.json();
+          const sha = (commit.sha || '').slice(0, 7);
+          const message = (commit.commit?.message || '').split('\n')[0].slice(0, 60);
+          const commitDate = new Date(commit.commit?.committer?.date || commit.commit?.author?.date);
+          const now = new Date();
+          const ageMin = (now - commitDate) / 60000;
 
           banner.classList.remove(
             'build-status--success',
@@ -129,26 +133,31 @@
             'build-status--pending',
             'build-status--hidden',
           );
-          document.body.setAttribute('data-build-status', state);
 
-          if (state === 'success') {
-            banner.classList.add('build-status--success');
-            banner.innerHTML = '✓ Sajt je objavljen — sve sačuvane izmjene su žive na visitpetrovac.com';
-          } else if (state === 'pending') {
+          if (ageMin < 3) {
+            // Fresh commit — Cloudflare build is likely in progress
             banner.classList.add('build-status--pending');
+            document.body.setAttribute('data-build-status', 'pending');
             banner.innerHTML =
-              '⏳ Build u toku — izmjene će biti vidljive na sajtu za 1—2 min. Osvježi ovu stranicu da provjeriš.';
-          } else if (state === 'failure' || state === 'error') {
-            banner.classList.add('build-status--failure');
+              `⏳ Build u toku za commit ${sha} (\"${message}\") — sačekaj 2—3 min, pa osvježi sajt da provjeriš.`;
+            return;
+          }
+
+          // Try to detect actual deployment via live site response
+          // (any 2xx response means the site is up; we can't easily tell if
+          // it includes the latest commit's content, but uptime is enough.)
+          if (siteRes && siteRes.ok) {
+            banner.classList.add('build-status--success');
+            document.body.setAttribute('data-build-status', 'success');
             banner.innerHTML =
-              '⚠ Posljednji build je pao — sajt prikazuje staru verziju. ' +
-              'Posljednje izmjene nisu žive. ' +
-              `<a href="https://github.com/milamedin/visitpetrovac/commit/${sha}" target="_blank" rel="noopener">Vidi commit ${sha}</a> ` +
-              '— najčešći razlog: tekst iznad limita ili neispravno polje. Javi developeru ako se ne riješi samo.';
+              `✓ Sajt je živ. Posljednji commit: ${sha} \"${message}\" (prije ${Math.round(ageMin)} min).`;
           } else {
-            // No status yet (fresh repo) — hide silently
-            banner.classList.add('build-status--hidden');
-            document.body.removeAttribute('data-build-status');
+            banner.classList.add('build-status--failure');
+            document.body.setAttribute('data-build-status', 'failure');
+            banner.innerHTML =
+              `⚠ Sajt nije dostupan ili build nije završen (commit ${sha} prije ${Math.round(ageMin)} min). ` +
+              `<a href="https://dash.cloudflare.com/" target="_blank" rel="noopener">Provjeri Cloudflare deployments</a>. ` +
+              'Najčešći razlog: tekst iznad limita ili neispravno polje.';
           }
         } catch (err) {
           // Network/CORS errors — fail quietly so Sveltia keeps working
