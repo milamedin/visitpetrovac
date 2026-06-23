@@ -12,7 +12,7 @@ amenities:
   - GPS
   - Dostava auta
 images:
-  - /uploads/Screenshot 2026-06-13 at 18.41.50.png
+  - /uploads/car-rental-promotion-social-media-instagram-post-banner-template.jpg
 location: null
 rating: 5
 website: https://rentakar.me/
